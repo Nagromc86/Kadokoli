@@ -379,7 +379,7 @@ function viewGifts(){
 }
 function viewMe(){
   var h=header('Mon compte'),u=S.update;
-  if(!NATIVE){h+='<div class="upd"><h3>Installe l\'appli sur ton téléphone</h3><p>Sur Android, l\'appli t\'envoie les rappels et se met à jour depuis cet écran.</p><button type="button" class="btn green full" data-download>'+IC.down+'Télécharger Kadokoli pour Android</button></div>'}else
+  if(!NATIVE){h+='<div class="upd"><h3>Installe l\'appli sur ton téléphone</h3><p>Sur Android, l\'appli t\'envoie les rappels et se met à jour depuis cet écran.</p><a class="btn green full" href="'+APK_URL+'" target="_blank" rel="noopener">'+IC.down+'Télécharger Kadokoli pour Android</a></div>'}else
   h+='<div class="upd"><h3>'+(u&&u.newer?'Nouvelle version '+esc(u.tag)+' disponible':'Mises à jour')+'</h3><p>'+
     (u&&u.newer?esc(u.notes||'Des améliorations t\'attendent.'):u&&u.checked?'Tu as la dernière version'+(APP_BUILD?' (1.'+APP_BUILD+')':'')+'.':'Version installée : '+(APP_BUILD?'1.'+APP_BUILD:'aperçu')+'.')+'</p>'+
     (u&&u.newer?'<button type="button" class="btn green full" data-download>'+IC.down+'Télécharger la mise à jour</button><p class="small" style="margin:10px 0 0">Ouvre ensuite le fichier téléchargé pour l\'installer : tes colis et cadeaux sont conservés.</p>'

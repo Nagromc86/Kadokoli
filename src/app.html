@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F6F4FF">
+<title>Kadokoli</title>
+<link rel="icon" href="icon-192.png">
+<style>
+/*@@FONTS@@*/
+/* Kadokoli — colis & cadeaux. Palette tirée du plumage du colibri : iris, émeraude, nectar, ciel, pollen. */
+:root{
+  --bg:#F6F4FF; --surface:#FFFFFF; --ink:#1D1640; --muted:#6E6890; --line:#E6E1FA;
+  --iris:#6C4CF1; --iris-2:#8F76FF; --iris-soft:#ECE7FF;
+  --emerald:#0FB989; --emerald-soft:#DDF7EE;
+  --nectar:#FF4F8B; --nectar-soft:#FFE3ED;
+  --sky:#22B8E6; --sky-soft:#DDF4FC;
+  --pollen:#FFB21E; --pollen-soft:#FFF1D2;
+  --danger:#E5484D;
+  --r-lg:26px; --r-md:18px; --r-sm:12px;
+  --shadow:0 10px 30px -12px rgba(48,28,140,.28);
+  --display:"Bricolage Grotesque",ui-rounded,system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45}
+body{min-height:100vh;padding-bottom:calc(92px + env(safe-area-inset-bottom))}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--iris-2);outline-offset:2px}
+.wrap{max-width:640px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 18px 24px}
+h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:-.01em}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.hello{font-size:.95rem;color:var(--muted)}
+h1{font-size:2.05rem;font-weight:800;line-height:1.05}
+.bird{width:44px;height:44px;flex:none}
+/* ---- résumé en tête d'onglet ---- */
+.hero{border-radius:var(--r-lg);padding:20px 20px 18px;color:#fff;position:relative;overflow:hidden;margin-bottom:22px;box-shadow:var(--shadow)}
+.hero.parcels{background:linear-gradient(135deg,#6C4CF1 0%,#22B8E6 100%)}
+.hero.gifts{background:linear-gradient(135deg,#FF4F8B 0%,#FFB21E 100%)}
+.hero .big{font-family:var(--display);font-weight:800;font-size:2.7rem;line-height:1}
+.hero p{margin:6px 0 0;opacity:.95}
+.hero .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.hero .pill{background:rgba(255,255,255,.22);border-radius:999px;padding:5px 11px;font-size:.85rem;font-weight:600}
+.hero svg.deco{position:absolute;right:-18px;top:-10px;width:150px;opacity:.22}
+/* ---- sections ---- */
+.sec{margin:0 0 24px}
+.sech{display:flex;align-items:baseline;justify-content:space-between;margin:0 4px 10px}
+.sech h2{font-size:1.15rem;font-weight:700}
+.sech span{color:var(--muted);font-size:.9rem}
+.list{display:flex;flex-direction:column;gap:10px}
+/* ---- colis ---- */
+.pcard{display:block;width:100%;text-align:left;background:var(--surface);border:0;border-radius:var(--r-md);padding:14px 16px 12px;box-shadow:0 2px 0 var(--line)}
+.pcard .row1{display:flex;align-items:center;gap:10px}
+.carrier{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--iris-soft);color:var(--iris);white-space:nowrap}
+.carrier i{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
+.pname{font-weight:700;font-size:1.05rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pstat{margin:6px 0 10px;font-size:.92rem;color:var(--muted)}
+.pstat b{color:var(--ink);font-weight:600}
+/* le trajet du colis : une ligne pointillée, le colibri vole jusqu'à l'étape en cours */
+.journey{position:relative;height:30px;margin:0 6px}
+.journey .track{position:absolute;left:0;right:0;top:15px;border-top:3px dotted var(--line)}
+.journey .done{position:absolute;left:0;top:13.5px;height:6px;border-radius:6px;background:linear-gradient(90deg,var(--iris),var(--sky))}
+.journey .dot{position:absolute;top:10px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:var(--surface);border:3px solid var(--line)}
+.journey .dot.on{border-color:var(--iris);background:var(--iris)}
+.journey .flyer{position:absolute;top:-4px;width:30px;height:30px;margin-left:-15px;transition:left .8s cubic-bezier(.3,1.4,.5,1)}
+.journey.big{height:44px;margin:12px 10px 4px}
+.journey.big .track{top:22px}.journey.big .done{top:20.5px}.journey.big .dot{top:16px;width:18px;height:18px;margin-left:-9px}
+.journey.big .flyer{top:-6px;width:38px;height:38px;margin-left:-19px}
+.jlabels{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin:0 -4px 6px}
+.jlabels span{width:20%;text-align:center}
+.jlabels span.on{color:var(--ink);font-weight:700}
+.pcard.delivered{opacity:.75}
+.pcard.relay{box-shadow:0 0 0 2px var(--pollen) inset}
+.code{font-family:var(--display);font-weight:700;letter-spacing:.06em}
+.relaybox{background:var(--pollen-soft);border-radius:var(--r-sm);padding:10px 12px;margin-top:10px;font-size:.92rem}
+/* ---- cadeaux : de vraies cartes ---- */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;margin:0 -2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{border:0;background:var(--surface);color:var(--muted);border-radius:999px;padding:8px 14px;font-weight:600;font-size:.9rem;white-space:nowrap;box-shadow:0 1px 0 var(--line)}
+.chip[aria-pressed="true"]{background:var(--ink);color:#fff}
+.gcard{position:relative;display:block;width:100%;border:0;text-align:left;color:#fff;border-radius:22px;padding:16px 18px;aspect-ratio:1.75;overflow:hidden;box-shadow:var(--shadow)}
+.gcard .brand{font-family:var(--display);font-weight:800;font-size:1.45rem;line-height:1.05;max-width:75%}
+.gcard .kind{font-size:.82rem;opacity:.9;font-weight:600;margin-top:4px}
+.gcard .amt{position:absolute;left:18px;bottom:16px}
+.gcard .amt b{font-family:var(--display);font-weight:800;font-size:2rem;line-height:1;display:block}
+.gcard .amt small{opacity:.9;font-size:.82rem}
+.gcard .exp{position:absolute;right:14px;top:14px;background:rgba(255,255,255,.25);backdrop-filter:blur(4px);border-radius:999px;padding:4px 10px;font-size:.78rem;font-weight:700}
+.gcard .exp.soon{background:var(--pollen);color:var(--ink)}
+.gcard .exp.urgent{background:#fff;color:var(--danger)}
+.gcard .exp.gone{background:rgba(0,0,0,.35)}
+.gcard .meter{position:absolute;right:18px;bottom:20px;width:38%;height:6px;border-radius:6px;background:rgba(255,255,255,.3)}
+.gcard .meter i{display:block;height:100%;border-radius:6px;background:#fff}
+.gcard .chipdeco{position:absolute;right:18px;top:50%;width:44px;height:34px;border-radius:8px;background:linear-gradient(135deg,rgba(255,255,255,.55),rgba(255,255,255,.15));transform:translateY(-50%)}
+.gcard.used{filter:saturate(.25);opacity:.75}
+.ggrid{display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:560px){.ggrid{grid-template-columns:1fr 1fr}}
+/* ---- vide ---- */
+.empty{background:var(--surface);border-radius:var(--r-lg);padding:28px 22px;text-align:center}
+.empty svg{width:110px;margin:0 auto 8px;display:block}
+.empty h3{font-size:1.2rem;margin-bottom:6px}
+.empty p{color:var(--muted);margin:0 0 16px}
+/* ---- boutons ---- */
+.btn{text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;padding:13px 20px;font-weight:700;background:var(--iris);color:#fff}
+.btn.full{width:100%}
+.btn.soft{background:var(--iris-soft);color:var(--iris)}
+.btn.ghost{background:transparent;color:var(--iris);padding:10px 12px}
+.btn.danger{background:var(--nectar-soft);color:#C21E58}
+.btn.pink{background:var(--nectar)}
+.btn.green{background:var(--emerald)}
+.btn svg{width:18px;height:18px}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap}
+.btnrow .btn{flex:1 1 140px}
+/* ---- barre du bas + bouton ajouter ---- */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:8px 14px calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:center}
+nav.tabs .in{display:flex;gap:6px;max-width:640px;width:100%;align-items:center}
+nav.tabs button.tab{flex:1;border:0;background:transparent;border-radius:16px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.78rem;font-weight:600;color:var(--muted)}
+nav.tabs button.tab svg{width:24px;height:24px}
+nav.tabs button.tab[aria-current="page"]{color:var(--iris);background:var(--iris-soft)}
+nav.tabs .add{width:58px;height:58px;border-radius:20px;border:0;background:linear-gradient(135deg,var(--nectar),var(--iris));color:#fff;display:grid;place-items:center;box-shadow:0 10px 24px -8px rgba(108,76,241,.7);margin:-26px 6px 0}
+nav.tabs .add svg{width:28px;height:28px}
+/* ---- feuilles (détail, ajout) ---- */
+.scrim{position:fixed;inset:0;background:rgba(29,22,64,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center;animation:fade .2s ease}
+.sheet{background:var(--bg);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:28px 28px 0 0;padding:10px 18px calc(22px + env(safe-area-inset-bottom));animation:up .28s cubic-bezier(.2,.9,.3,1.05)}
+.grab{width:44px;height:5px;border-radius:5px;background:var(--line);margin:4px auto 12px}
+.sheet h2{font-size:1.45rem;font-weight:800;margin-bottom:4px}
+.sheet .sub{color:var(--muted);margin:0 0 16px}
+@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.card{background:var(--surface);border-radius:var(--r-md);padding:14px 16px;margin-bottom:12px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;font-size:.95rem}
+.kv dt{color:var(--muted)}.kv dd{margin:0;font-weight:600;text-align:right;overflow-wrap:anywhere}
+.field{display:block;margin-bottom:12px}
+.field>span{display:block;font-size:.88rem;font-weight:600;margin:0 0 6px 4px}
+.field input,.field select,.field textarea{width:100%;border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;font-size:1rem}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--iris-2);outline:none}
+.field textarea{min-height:76px;resize:vertical}
+.field .hint{display:block;font-size:.82rem;color:var(--muted);margin:6px 4px 0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.seg button{border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:10px 12px;font-weight:600;display:flex;align-items:center;gap:8px;flex:1 1 auto}
+.seg button[aria-pressed="true"]{border-color:var(--iris);background:var(--iris-soft);color:var(--iris)}
+.seg button span{font-size:1.2rem}
+.detected{display:flex;align-items:center;gap:8px;background:var(--emerald-soft);color:#0A7A5B;border-radius:12px;padding:8px 12px;font-weight:600;font-size:.9rem;margin:-4px 0 12px}
+.timeline{list-style:none;margin:0;padding:0}
+.timeline li{position:relative;padding:0 0 14px 26px}
+.timeline li::before{content:"";position:absolute;left:6px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--line)}
+.timeline li::after{content:"";position:absolute;left:10px;top:18px;bottom:0;width:2px;background:var(--line)}
+.timeline li:last-child::after{display:none}
+.timeline li:first-child::before{background:var(--iris);box-shadow:0 0 0 4px var(--iris-soft)}
+.timeline b{display:block;font-weight:600}
+.timeline small{color:var(--muted)}
+.codebox{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:2px dashed var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.codebox .code{font-size:1.25rem;overflow-wrap:anywhere}
+.barcode{background:#fff;border-radius:14px;padding:10px;text-align:center;margin-bottom:10px}
+.barcode svg{max-width:100%;height:auto}
+.photo{width:100%;border-radius:16px;display:block;margin-bottom:10px}
+.uses{list-style:none;margin:0;padding:0}
+.uses li{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:.95rem}
+.uses li:last-child{border:0}
+.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;font-weight:600;z-index:60;max-width:90vw;text-align:center;animation:up .25s ease}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.setrow:last-child{border:0}
+.setrow p{margin:2px 0 0;color:var(--muted);font-size:.86rem}
+.switch{appearance:none;width:50px;height:30px;border-radius:30px;background:var(--line);position:relative;flex:none;transition:background .2s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.switch:checked{background:var(--emerald)}.switch:checked::after{left:23px}
+.upd{border-radius:var(--r-md);padding:16px;background:linear-gradient(135deg,var(--emerald-soft),var(--sky-soft));margin-bottom:12px}
+.upd h3{font-size:1.1rem;margin-bottom:4px}
+.upd p{margin:0 0 12px;color:#2E4D5A}
+.qr{background:#fff;border-radius:16px;padding:12px;width:180px;margin:6px auto 12px}
+.small{font-size:.85rem;color:var(--muted)}
+.cta-pill{display:inline-flex;gap:6px;align-items:center;background:var(--surface);border-radius:999px;padding:6px 12px;font-weight:600;font-size:.88rem;border:0;color:var(--iris)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+<nav class="tabs" id="nav"></nav>
+<div id="layer"></div>
+<script>/*@@JSBARCODE@@*/</script>
+<script id="app-js">
+(function(){
+'use strict';
+var APP_BUILD=0; /* remplacé par le numéro de version au moment de construire l'APK */
+var REPO='Nagromc86/kadokoli';
+var APK_URL='https://github.com/'+REPO+'/releases/latest/download/kadokoli.apk';
+var NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+var KEY='kadokoli:v1';
+
+/* ---------- données ---------- */
+var D=load();
+function blank(){return {parcels:[],gifts:[],me:{name:'',notif:true,laposteKey:''},seen:0}}
+function load(){try{var d=JSON.parse(localStorage.getItem(KEY)||'null');if(d&&d.parcels)return Object.assign(blank(),d)}catch(e){}return blank()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){toast('Mémoire pleine : supprime des photos de cartes.')}scheduleReminders()}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+var S={tab:'parcels',gfilter:'all',sheet:null,showDelivered:false,update:null};
+
+/* ---------- utilitaires ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function $(s,r){return (r||document).querySelector(s)}
+function money(n){var v=Math.round((+n||0)*100)/100;return v.toLocaleString('fr-FR',{minimumFractionDigits:v%1?2:0,maximumFractionDigits:2})+' €'}
+function num(v){if(v==null||v==='')return null;var n=parseFloat(String(v).replace(/\s/g,'').replace(',','.'));return isFinite(n)?n:null}
+function today(){var d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate())}
+function pdate(s){if(!s)return null;var p=String(s).slice(0,10).split('-');return p.length===3?new Date(+p[0],+p[1]-1,+p[2]):null}
+function ymd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function daysTo(s){var d=pdate(s);return d?Math.round((d-today())/864e5):null}
+var fLong=new Intl.DateTimeFormat('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+var fShort=new Intl.DateTimeFormat('fr-FR',{day:'numeric',month:'short',year:'numeric'});
+var fDay=new Intl.DateTimeFormat('fr-FR',{day:'numeric',month:'long'});
+var fTime=new Intl.DateTimeFormat('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s}
+function toast(m){var t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove()},2600)}
+function copy(t,label){
+  var ok=function(){toast((label||'Copié')+' ✓')};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,fb);else fb();
+  function fb(){var a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy');ok()}catch(e){}a.remove()}
+}
+function PL(n){return window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins[n]}
+function share(title,text,url){
+  if(NATIVE&&PL('Share'))return PL('Share').share({title:title,text:text,url:url,dialogTitle:'Partager'}).catch(function(){});
+  if(navigator.share)return navigator.share({title:title,text:text,url:url}).catch(function(){});
+  copy([text,url].filter(Boolean).join('\n'),'Texte copié, colle-le dans un message');
+}
+function hash(s){var h=0;s=String(s||'');for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return Math.abs(h)}
+
+/* ---------- icônes ---------- */
+var IC={
+  box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>',
+  gift:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 12h18M12 8v13"/><path d="M12 8c-2-4-6-4-6-1.5S9 8 12 8c3 0 6 .5 6-1.5S14 4 12 8z"/></svg>',
+  me:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h8"/></svg>',
+  share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M7 8l5-5 5 5M5 14v5a2 2 0 002 2h10a2 2 0 002-2v-5"/></svg>',
+  link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1M14 10a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></svg>',
+  refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11a8 8 0 10-2.3 5.7M20 4v7h-7"/></svg>',
+  down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg>'
+};
+/* le colibri, dessiné pour l'appli (et réutilisé comme « curseur » du trajet des colis) */
+function bird(c){c=c||'#6C4CF1';var id='kb'+c.slice(1);return '<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="'+id+'" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#0FB989"/><stop offset=".5" stop-color="'+c+'"/><stop offset="1" stop-color="#FF4F8B"/></linearGradient></defs>'+
+  '<path d="M41 21.5L62 15.5L41.5 25z" fill="#1D1640"/>'+
+  '<path d="M14 56l6-14c3-9 9-17 16-21 5-2 8 1 7 5-1 7-8 13-15 18l-8 5 3 9-6-6z" fill="url(#'+id+')"/>'+
+  '<path d="M31 26C25 18 24 9 29 2c6 6 9 14 7 22z" fill="#FFB21E"/>'+
+  '<path d="M29 27C20 22 13 14 12 5c8 3 15 9 18 18z" fill="'+c+'" opacity=".55"/>'+
+  '<circle cx="38" cy="22" r="1.9" fill="#1D1640"/></svg>'}
+
+/* ---------- transporteurs ---------- */
+var CARRIERS={
+  colissimo:{n:'Colissimo',c:'#F2A900',url:'https://www.laposte.fr/outils/suivre-vos-envois?code=',lp:1},
+  laposte:{n:'La Poste',c:'#E3A400',url:'https://www.laposte.fr/outils/suivre-vos-envois?code=',lp:1},
+  chronopost:{n:'Chronopost',c:'#1D5FA8',url:'https://www.chronopost.fr/tracking-no-cms/suivi-page?listeNumerosLT=',lp:1},
+  mondialrelay:{n:'Mondial Relay',c:'#C8102E',url:'https://www.mondialrelay.fr/suivi-de-colis/?numeroExpedition='},
+  relaiscolis:{n:'Relais Colis',c:'#7A3FB5',url:'https://www.relaiscolis.com/suivi-de-colis/index.php?valeur='},
+  colisprive:{n:'Colis Privé',c:'#E85D04',url:'https://www.colisprive.com/moncolis/pages/detailColis.aspx?numColis='},
+  dpd:{n:'DPD',c:'#DC0032',url:'https://trace.dpd.fr/fr/trace/'},
+  gls:{n:'GLS',c:'#0A2D8C',url:'https://gls-group.com/FR/fr/suivi-colis?match='},
+  ups:{n:'UPS',c:'#5C3A1E',url:'https://www.ups.com/track?loc=fr_FR&tracknum='},
+  dhl:{n:'DHL',c:'#D40511',url:'https://www.dhl.com/fr-fr/home/suivi.html?tracking-id='},
+  fedex:{n:'FedEx',c:'#4D148C',url:'https://www.fedex.com/fedextrack/?trknbr='},
+  amazon:{n:'Amazon',c:'#232F3E',url:'https://track.amazon.fr/tracking/'},
+  vinted:{n:'Vinted Go',c:'#09B1BA',url:'https://www.vinted.fr/'},
+  other:{n:'Autre',c:'#6E6890',url:''}
+};
+/* reconnaît le transporteur d'après le numéro (ou le lien collé) */
+function detect(raw){
+  var s=String(raw||'').trim(),host='',num=s;
+  var m=/^https?:\/\/([^\/]+)(.*)$/i.exec(s);
+  if(m){host=m[1].toLowerCase();var q=/[?&](?:code|numeroExpedition|tracknum|tracking-id|trknbr|listeNumerosLT|valeur|numColis|match|tracking)=([A-Za-z0-9]+)/.exec(m[2])||/\/([A-Za-z0-9]{8,})\/?$/.exec(m[2]);num=q?q[1]:''}
+  num=num.replace(/[\s-]/g,'').toUpperCase();
+  var byHost=[['laposte','colissimo'],['colissimo','colissimo'],['chronopost','chronopost'],['mondialrelay','mondialrelay'],['relaiscolis','relaiscolis'],['colisprive','colisprive'],['dpd','dpd'],['gls','gls'],['ups.com','ups'],['dhl','dhl'],['fedex','fedex'],['amazon','amazon'],['vinted','vinted']];
+  for(var i=0;i<byHost.length;i++)if(host.indexOf(byHost[i][0])>=0)return {num:num,carrier:byHost[i][1]};
+  var c='';
+  if(/^1Z[0-9A-Z]{16}$/.test(num))c='ups';
+  else if(/^TBA\d{9,}$/.test(num))c='amazon';
+  else if(/^[0-9][A-Z][0-9]{11}$/.test(num)||/^[A-Z]{2}\d{9}FR$/.test(num))c='colissimo';
+  else if(/^[A-Z]{2}\d{9}[A-Z]{2}$/.test(num))c='chronopost';
+  else if(/^(JJD|JVGL)\d+/.test(num)||/^\d{10}$/.test(num))c='dhl';
+  else if(/^\d{14}$/.test(num))c='dpd';
+  else if(/^\d{12}$/.test(num)||/^\d{15}$/.test(num))c='fedex';
+  else if(/^\d{8}$/.test(num))c='mondialrelay';
+  else if(/^\d{11}$/.test(num))c='gls';
+  else if(/^\d{16}$/.test(num))c='colisprive';
+  return {num:num,carrier:c};
+}
+function trackUrl(p){var c=CARRIERS[p.carrier]||CARRIERS.other;return p.link||(c.url?c.url+encodeURIComponent(p.num):'')}
+
+/* ---------- statut d'un colis ---------- */
+var STEPS=[['ordered','Commandé'],['shipped','Expédié'],['transit','En chemin'],['near','Bientôt là'],['delivered','Livré']];
+var STATUS={ordered:{t:'Commandé',s:0},shipped:{t:'Expédié',s:1},transit:{t:'En chemin',s:2},out:{t:'En cours de livraison',s:3},relay:{t:'À retirer en point relais',s:3},delivered:{t:'Livré',s:4},issue:{t:'Problème de livraison',s:2}};
+function stepOf(p){return (STATUS[p.status]||STATUS.ordered).s}
+function journey(p,big){
+  var st=stepOf(p),pct=st/4*100,h='<div class="journey'+(big?' big':'')+'" aria-hidden="true"><div class="track"></div><div class="done" style="width:'+pct+'%"></div>';
+  for(var i=0;i<5;i++)h+='<span class="dot'+(i<=st?' on':'')+'" style="left:'+(i*25)+'%"></span>';
+  return h+'<span class="flyer" style="left:'+pct+'%">'+bird(p.status==='issue'?'#E5484D':'#6C4CF1')+'</span></div>';
+}
+function statusLine(p){
+  var s=STATUS[p.status]||STATUS.ordered,last=(p.events||[])[0],eta=p.eta&&p.status!=='delivered'?daysTo(p.eta):null;
+  var bits='<b>'+esc(s.t)+'</b>';
+  if(p.status==='relay'&&p.pickupBy){var dl=daysTo(p.pickupBy);bits+=' · à retirer '+(dl===0?"aujourd'hui":dl===1?'avant demain':'avant le '+fDay.format(pdate(p.pickupBy)))}
+  else if(eta!=null&&eta>=0)bits+=' · '+(eta===0?"arrive aujourd'hui":eta===1?'arrive demain':'prévu '+fLong.format(pdate(p.eta)))
+  else if(last)bits+=' · '+esc(last.label.length>48?last.label.slice(0,46)+'…':last.label);
+  return bits;
+}
+
+/* ---------- cartes cadeaux ---------- */
+var GTYPES=[['card','Carte cadeau','💳'],['voucher','Bon d\'achat','🎟️'],['box','Coffret','🎁'],['ecard','E-carte','📱'],['credit','Avoir','🧾']];
+var GT={};GTYPES.forEach(function(t){GT[t[0]]={n:t[1],e:t[2]}});
+var GRAD=[['#6C4CF1','#22B8E6'],['#FF4F8B','#FFB21E'],['#0FB989','#22B8E6'],['#8F76FF','#FF4F8B'],['#FF7A45','#FF4F8B'],['#1D9BF0','#0FB989'],['#B44CF1','#6C4CF1'],['#FFB21E','#0FB989']];
+var BRANDS={fnac:['#F2A200','#E05A00'],decathlon:['#0082C3','#22B8E6'],smartbox:['#FF4F8B','#FF7A45'],wonderbox:['#E5484D','#FF4F8B'],amazon:['#232F3E','#FF9900'],sephora:['#1D1640','#6C4CF1'],ikea:['#0058A3','#1D9BF0'],zalando:['#FF6900','#FF4F8B'],cultura:['#6C2C91','#B44CF1'],darty:['#E30613','#FF7A45'],boulanger:['#F37021','#FFB21E'],leroymerlin:['#4F9A2A','#0FB989'],carrefour:['#0055A5','#22B8E6'],leclerc:['#0066B3','#0FB989'],nocibe:['#1D1640','#FF4F8B'],kiabi:['#003D7C','#22B8E6'],apple:['#1D1640','#6E6890'],netflix:['#B20710','#E50914'],spotify:['#1DB954','#0FB989'],tictactrip:['#6C4CF1','#FF4F8B'],illicado:['#E5007E','#FF4F8B'],cadhoc:['#E85D04','#FFB21E']};
+function gradOf(g){var k=String(g.brand||'').toLowerCase().normalize('NFD').replace(/[^a-z]/g,'');var p=BRANDS[k]||GRAD[hash((g.brand||'')+(g.type||''))%GRAD.length];return 'linear-gradient(135deg,'+p[0]+','+p[1]+')'}
+function bal(g){var b=num(g.balance);return b==null?num(g.amount):b}
+function expTag(g){
+  if(g.used)return {c:'gone',t:'Utilisé'};
+  var d=daysTo(g.expiry);if(d==null)return null;
+  if(d<0)return {c:'gone',t:'Expiré'};
+  if(d===0)return {c:'urgent',t:"Expire aujourd'hui"};
+  if(d<=7)return {c:'urgent',t:'Expire dans '+d+' j'};
+  if(d<=30)return {c:'soon',t:'Expire dans '+d+' j'};
+  return {c:'',t:'Jusqu\'au '+fShort.format(pdate(g.expiry))};
+}
+function giftCard(g,i){
+  var e=expTag(g),b=bal(g),a=num(g.amount),pct=a&&b!=null?Math.max(0,Math.min(100,b/a*100)):null;
+  return '<button type="button" class="gcard'+(g.used||(e&&e.c==='gone')?' used':'')+'" style="background:'+gradOf(g)+'" data-gift="'+esc(g.id)+'">'+
+    (e?'<span class="exp '+e.c+'">'+esc(e.t)+'</span>':'')+
+    '<div class="brand">'+esc(g.brand||g.title||'Sans nom')+'</div><div class="kind">'+esc((GT[g.type]||GT.card).n)+(g.type==='box'&&g.title&&g.brand?' · '+esc(g.title):'')+'</div>'+
+    (g.type==='box'?'<span class="chipdeco"></span>':'')+
+    '<div class="amt">'+(b!=null?'<b>'+esc(money(b))+'</b>'+(a&&b!==a?'<small>sur '+esc(money(a))+'</small>':'<small>'+(g.type==='box'?'valeur':'à dépenser')+'</small>'):'<b>'+esc(g.persons?g.persons+' pers.':'—')+'</b><small>'+(g.type==='box'?'coffret':'')+'</small>')+'</div>'+
+    (pct!=null&&pct<100?'<span class="meter"><i style="width:'+pct+'%"></i></span>':'')+
+  '</button>';
+}
+
+/* ---------- vues ---------- */
+function render(){
+  var app=$('#app'),h='';
+  if(S.tab==='parcels')h=viewParcels();else if(S.tab==='gifts')h=viewGifts();else h=viewMe();
+  app.innerHTML=h;
+  $('#nav').innerHTML='<div class="in">'+tab('parcels','Colis',IC.box)+tab('gifts','Cadeaux',IC.gift)+
+    '<button type="button" class="add" data-add aria-label="'+(S.tab==='gifts'?'Ajouter un cadeau':'Ajouter un colis')+'">'+IC.plus+'</button>'+tab('me','Mon compte',IC.me)+'</div>';
+  if(S.tab==='gifts')drawBarcodes();
+}
+function tab(k,l,ic){return '<button type="button" class="tab" data-tab="'+k+'"'+(S.tab===k?' aria-current="page"':'')+'>'+ic+'<span>'+l+'</span></button>'}
+function header(title){
+  var n=D.me.name?'Salut '+esc(D.me.name)+' 👋':'Salut 👋';
+  return '<div class="top"><div><div class="hello">'+n+'</div><h1>'+title+'</h1></div><div class="bird">'+bird()+'</div></div>';
+}
+function viewParcels(){
+  var P=D.parcels.slice().sort(function(a,b){return (a.eta||'9999').localeCompare(b.eta||'9999')||(b.at-a.at)});
+  var act=P.filter(function(p){return p.status!=='delivered'}),dlv=P.filter(function(p){return p.status==='delivered'});
+  var relay=act.filter(function(p){return p.status==='relay'}),todayP=act.filter(function(p){return p.status==='out'||(p.eta&&daysTo(p.eta)===0)});
+  var h=header('Mes colis');
+  if(!P.length)return h+'<div class="empty">'+bird()+'<h3>Aucun colis en route</h3><p>Colle un numéro de suivi : Kadokoli reconnaît le transporteur et te dit où en est ton colis.</p><button type="button" class="btn" data-add>'+IC.plus+'Ajouter un colis</button></div>';
+  h+='<div class="hero parcels"><svg class="deco" viewBox="0 0 64 64">'+bird('#ffffff').replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'')+'</svg><div class="big">'+act.length+'</div><p>'+(act.length>1?'colis en route':act.length?'colis en route':'Tout est arrivé 🎉')+'</p><div class="pills">'+
+    (todayP.length?'<span class="pill">🚚 '+todayP.length+' aujourd\'hui</span>':'')+(relay.length?'<span class="pill">📍 '+relay.length+' à retirer</span>':'')+(dlv.length?'<span class="pill">✓ '+dlv.length+' livré'+(dlv.length>1?'s':'')+'</span>':'')+'</div></div>';
+  if(relay.length)h+=group('À retirer en point relais',relay);
+  var rest=act.filter(function(p){return relay.indexOf(p)<0});
+  if(rest.length)h+=group('En route',rest);
+  if(dlv.length)h+='<div class="sec"><div class="sech"><h2>Livrés</h2><button type="button" class="cta-pill" data-toggledel>'+(S.showDelivered?'Masquer':'Afficher ('+dlv.length+')')+'</button></div>'+(S.showDelivered?'<div class="list">'+dlv.map(pcard).join('')+'</div>':'')+'</div>';
+  return h;
+}
+function group(t,L){return '<div class="sec"><div class="sech"><h2>'+t+'</h2><span>'+L.length+'</span></div><div class="list">'+L.map(pcard).join('')+'</div></div>'}
+function pcard(p){
+  var c=CARRIERS[p.carrier]||CARRIERS.other;
+  return '<button type="button" class="pcard'+(p.status==='delivered'?' delivered':p.status==='relay'?' relay':'')+'" data-parcel="'+esc(p.id)+'">'+
+    '<div class="row1"><span class="pname">'+esc(p.name||'Colis '+p.num)+'</span><span class="carrier" style="color:'+c.c+';background:'+c.c+'1A"><i></i>'+esc(c.n)+'</span></div>'+
+    '<div class="pstat">'+statusLine(p)+(p.shop?' · <span>'+esc(p.shop)+'</span>':'')+'</div>'+journey(p)+'</button>';
+}
+function viewGifts(){
+  var G=D.gifts.slice().sort(function(a,b){var x=a.used?1:0,y=b.used?1:0;if(x!==y)return x-y;return (a.expiry||'9999').localeCompare(b.expiry||'9999')});
+  var live=G.filter(function(g){var d=daysTo(g.expiry);return !g.used&&(d==null||d>=0)});
+  var total=live.reduce(function(s,g){return s+(bal(g)||0)},0),soon=live.filter(function(g){var d=daysTo(g.expiry);return d!=null&&d<=30});
+  var h=header('Mes cadeaux');
+  if(!G.length)return h+'<div class="empty">'+bird('#FF4F8B')+'<h3>Pas encore de carte cadeau</h3><p>Ajoute tes cartes cadeaux, bons d\'achat et coffrets : Kadokoli te prévient avant qu\'ils expirent et garde le code à portée de main en caisse.</p><button type="button" class="btn pink" data-add>'+IC.plus+'Ajouter un cadeau</button></div>';
+  h+='<div class="hero gifts"><div class="big">'+esc(money(total))+'</div><p>à dépenser sur '+live.length+' carte'+(live.length>1?'s':'')+' et bon'+(live.length>1?'s':'')+'</p><div class="pills">'+
+    (soon.length?'<span class="pill">⏳ '+soon.length+' expire'+(soon.length>1?'nt':'')+' dans le mois</span>':'<span class="pill">Rien n\'expire ce mois-ci</span>')+'</div></div>';
+  var f=S.gfilter,L=G.filter(function(g){return f==='all'||(f==='used'?(g.used||daysTo(g.expiry)<0):g.type===f&&!g.used)});
+  h+='<div class="chips">'+[['all','Tout'],['card','Cartes'],['voucher','Bons d\'achat'],['box','Coffrets'],['ecard','E-cartes'],['credit','Avoirs'],['used','Utilisés']].map(function(o){return '<button type="button" class="chip" data-gfilter="'+o[0]+'" aria-pressed="'+(f===o[0])+'">'+o[1]+'</button>'}).join('')+'</div>';
+  h+=L.length?'<div class="ggrid">'+L.map(giftCard).join('')+'</div>':'<div class="empty"><p>Rien dans cette catégorie.</p></div>';
+  return h;
+}
+function viewMe(){
+  var h=header('Mon compte'),u=S.update;
+  if(!NATIVE){h+='<div class="upd"><h3>Installe l\'appli sur ton téléphone</h3><p>Sur Android, l\'appli t\'envoie les rappels et se met à jour depuis cet écran.</p><button type="button" class="btn green full" data-download>'+IC.down+'Télécharger Kadokoli pour Android</button></div>'}else
+  h+='<div class="upd"><h3>'+(u&&u.newer?'Nouvelle version '+esc(u.tag)+' disponible':'Mises à jour')+'</h3><p>'+
+    (u&&u.newer?esc(u.notes||'Des améliorations t\'attendent.'):u&&u.checked?'Tu as la dernière version'+(APP_BUILD?' (1.'+APP_BUILD+')':'')+'.':'Version installée : '+(APP_BUILD?'1.'+APP_BUILD:'aperçu')+'.')+'</p>'+
+    (u&&u.newer?'<button type="button" class="btn green full" data-download>'+IC.down+'Télécharger la mise à jour</button><p class="small" style="margin:10px 0 0">Ouvre ensuite le fichier téléchargé pour l\'installer : tes colis et cadeaux sont conservés.</p>'
+      :'<button type="button" class="btn soft full" data-checkupd>'+IC.refresh+(u&&u.loading?'Recherche…':'Rechercher une mise à jour')+'</button>')+'</div>';
+  h+='<div class="card"><label class="field" style="margin:0"><span>Ton prénom</span><input id="f-name" value="'+esc(D.me.name)+'" placeholder="Pour te dire bonjour" autocomplete="given-name"></label></div>';
+  h+='<div class="card"><div class="setrow"><div><b>Rappels</b><p>Une notification 30 jours, 7 jours et la veille de l\'expiration d\'un cadeau, et avant la date limite de retrait d\'un colis.</p></div><input type="checkbox" class="switch" data-notif'+(D.me.notif?' checked':'')+' aria-label="Rappels"></div>'+
+    '<div class="setrow"><div style="flex:1"><b>Suivi automatique La Poste</b><p>Colissimo, La Poste et Chronopost se mettent à jour tout seuls avec une clé gratuite du site développeur de La Poste (« Suivi v2 »). Les autres transporteurs s\'ouvrent sur leur site.</p><label class="field" style="margin:10px 0 0"><input id="f-lpkey" value="'+esc(D.me.laposteKey)+'" placeholder="Clé « X-Okapi-Key »" autocapitalize="off" spellcheck="false"></label></div></div></div>';
+  h+='<div class="card"><b>Partager Kadokoli</b><p class="small" style="margin:4px 0 10px">Envoie l\'appli à tes proches : sur Android, le lien télécharge l\'appli.</p><div class="qr" id="qr"></div><div class="btnrow"><button type="button" class="btn" data-shareapp>'+IC.share+'Partager l\'appli</button><button type="button" class="btn soft" data-copy="'+esc(APK_URL)+'">'+IC.copy+'Copier le lien</button></div></div>';
+  h+='<div class="card"><b>Sauvegarde</b><p class="small" style="margin:4px 0 10px">Tes données restent sur ce téléphone. Exporte-les pour les garder ou les passer sur un autre appareil.</p><div class="btnrow"><button type="button" class="btn soft" data-export>'+IC.down+'Exporter</button><label class="btn soft">'+IC.share+'Importer<input type="file" id="f-import" accept=".json,application/json" hidden></label></div></div>';
+  h+='<p class="small" style="text-align:center">Kadokoli '+(APP_BUILD?'1.'+APP_BUILD:'(aperçu)')+' · fait maison avec soin</p>';
+  setTimeout(drawQr,0);
+  return h;
+}
+function drawQr(){var el=$('#qr');if(!el||el.firstChild)return;el.innerHTML=qrSvg(APK_URL)}
+
+/* ---------- feuilles ---------- */
+function openSheet(html){
+  var keep=S.sheet;closeSheet(true);S.sheet=keep;
+  var l=$('#layer');l.innerHTML='<div class="scrim" data-scrim><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>'+html+'</div></div>';
+  document.body.style.overflow='hidden';drawBarcodes();
+  var f=l.querySelector('[autofocus]');if(f)setTimeout(function(){f.focus()},250);
+}
+function closeSheet(silent){var l=$('#layer');if(l.firstChild){l.innerHTML='';document.body.style.overflow=''}S.sheet=null;if(!silent)render()}
+function sheetParcel(p){
+  S.sheet={k:'parcel',id:p.id};var c=CARRIERS[p.carrier]||CARRIERS.other,u=trackUrl(p),ev=p.events||[];
+  var h='<h2>'+esc(p.name||'Colis')+'</h2><p class="sub">'+esc([p.shop,c.n].filter(Boolean).join(' · '))+'</p>';
+  h+='<div class="card"><div class="jlabels">'+STEPS.map(function(s,i){return '<span'+(i===stepOf(p)?' class="on"':'')+'>'+s[1]+'</span>'}).join('')+'</div>'+journey(p,true)+
+    '<p style="margin:12px 0 0">'+statusLine(p)+'</p>'+(p.updated?'<p class="small" style="margin:4px 0 0">Mis à jour '+esc(fTime.format(new Date(p.updated)))+'</p>':'')+'</div>';
+  if(p.status==='relay')h+='<div class="relaybox">📍 <b>'+esc(p.relay||'Point relais')+'</b>'+(p.pickupCode?'<br>Code de retrait : <span class="code">'+esc(p.pickupCode)+'</span>':'')+(p.pickupBy?'<br>À retirer avant le '+esc(fShort.format(pdate(p.pickupBy))):'')+'</div>';
+  h+='<div class="codebox"><div><div class="small">Numéro de suivi</div><div class="code">'+esc(p.num||'—')+'</div></div><button type="button" class="btn ghost" data-copy="'+esc(p.num)+'" aria-label="Copier le numéro">'+IC.copy+'</button></div>';
+  h+='<div class="btnrow" style="margin-bottom:12px">'+(u?'<a class="btn" href="'+esc(u)+'" target="_blank" rel="noopener">'+IC.link+'Suivre sur le site</a>':'')+(CARRIERS[p.carrier]&&CARRIERS[p.carrier].lp?'<button type="button" class="btn soft" data-refresh="'+esc(p.id)+'">'+IC.refresh+'Actualiser</button>':'')+'</div>';
+  h+='<div class="card"><b>Où en est-il ?</b><p class="small" style="margin:2px 0 10px">Mets à jour toi-même si le transporteur ne le fait pas.</p><div class="seg">'+
+    [['shipped','📦','Expédié'],['transit','🛫','En chemin'],['out','🚚','En livraison'],['relay','📍','En point relais'],['delivered','✅','Livré'],['issue','⚠️','Problème']].map(function(o){return '<button type="button" data-setstatus="'+o[0]+'" aria-pressed="'+(p.status===o[0])+'"><span>'+o[1]+'</span>'+o[2]+'</button>'}).join('')+'</div></div>';
+  if(ev.length)h+='<div class="card"><b>Historique</b><ul class="timeline" style="margin-top:10px">'+ev.slice(0,15).map(function(e){return '<li><b>'+esc(e.label)+'</b><small>'+esc(e.date?fTime.format(new Date(e.date)):'')+(e.place?' · '+esc(e.place):'')+'</small></li>'}).join('')+'</ul></div>';
+  if(p.notes)h+='<div class="card"><b>Notes</b><p style="margin:6px 0 0;white-space:pre-wrap">'+esc(p.notes)+'</p></div>';
+  h+='<div class="btnrow"><button type="button" class="btn soft" data-shareparcel="'+esc(p.id)+'">'+IC.share+'Partager</button><button type="button" class="btn soft" data-editparcel="'+esc(p.id)+'">Modifier</button><button type="button" class="btn danger" data-del="parcel:'+esc(p.id)+'">Supprimer</button></div>';
+  openSheet(h);
+}
+function sheetGift(g){
+  S.sheet={k:'gift',id:g.id};var b=bal(g),a=num(g.amount),e=expTag(g);
+  var h='<div style="margin-bottom:14px">'+giftCard(g).replace('<button type="button" class="gcard','<div class="gcard').replace(/<\/button>$/,'</div>')+'</div>';
+  h+='<div class="card"><dl class="kv">'+
+    (b!=null?'<dt>Reste à dépenser</dt><dd>'+esc(money(b))+'</dd>':'')+(a!=null&&a!==b?'<dt>Montant de départ</dt><dd>'+esc(money(a))+'</dd>':'')+
+    (g.expiry?'<dt>Valable jusqu\'au</dt><dd>'+esc(fShort.format(pdate(g.expiry)))+(e&&e.c!==''?' · '+esc(e.t.toLowerCase()):'')+'</dd>':'<dt>Expiration</dt><dd>Aucune date</dd>')+
+    (g.from?'<dt>Offert par</dt><dd>'+esc(g.from)+'</dd>':'')+(g.persons?'<dt>Pour</dt><dd>'+esc(g.persons)+' personne'+(g.persons>1?'s':'')+'</dd>':'')+
+  '</dl></div>';
+  if(g.code)h+='<div class="codebox"><div><div class="small">'+(g.type==='box'?'Code d\'activation':'Numéro de la carte')+'</div><div class="code">'+esc(g.code)+'</div></div><button type="button" class="btn ghost" data-copy="'+esc(g.code)+'" aria-label="Copier le code">'+IC.copy+'</button></div>'+
+    (/^[0-9A-Za-z\-]{4,40}$/.test(g.code)?'<div class="barcode"><svg data-barcode="'+esc(g.code)+'"></svg><div class="small">À présenter en caisse</div></div>':'');
+  if(g.pin)h+='<div class="codebox"><div><div class="small">Code PIN</div><div class="code" data-pin="'+esc(g.pin)+'">••••</div></div><button type="button" class="btn ghost" data-showpin>Afficher</button></div>';
+  if(g.photo)h+='<img class="photo" src="'+esc(g.photo)+'" alt="Photo de la carte">';
+  if(g.where)h+='<a class="btn soft full" style="margin-bottom:12px" href="'+esc(/^https?:/.test(g.where)?g.where:'https://www.google.com/search?q='+encodeURIComponent(g.where))+'" target="_blank" rel="noopener">'+IC.link+'Où l\'utiliser</a>';
+  if(!g.used&&g.type!=='box'&&b!=null)h+='<div class="card"><b>J\'ai fait un achat</b><p class="small" style="margin:2px 0 10px">Déduis le montant dépensé : le solde se met à jour.</p><div class="two"><label class="field" style="margin:0"><input id="f-spend" inputmode="decimal" placeholder="Montant (€)"></label><button type="button" class="btn" data-spend="'+esc(g.id)+'">Déduire</button></div></div>';
+  if(g.uses&&g.uses.length)h+='<div class="card"><b>Utilisations</b><ul class="uses" style="margin-top:6px">'+g.uses.map(function(u){return '<li><span>'+esc(fShort.format(new Date(u.at)))+(u.note?' · '+esc(u.note):'')+'</span><b>− '+esc(money(u.amount))+'</b></li>'}).join('')+'</ul></div>';
+  if(g.notes)h+='<div class="card"><b>Notes</b><p style="margin:6px 0 0;white-space:pre-wrap">'+esc(g.notes)+'</p></div>';
+  h+='<div class="btnrow">'+(g.used?'<button type="button" class="btn soft" data-unuse="'+esc(g.id)+'">Remettre en cours</button>':'<button type="button" class="btn green" data-use="'+esc(g.id)+'">Marquer comme utilisé</button>')+
+    '<button type="button" class="btn soft" data-sharegift="'+esc(g.id)+'">'+IC.share+'Partager</button><button type="button" class="btn soft" data-editgift="'+esc(g.id)+'">Modifier</button><button type="button" class="btn danger" data-del="gift:'+esc(g.id)+'">Supprimer</button></div>';
+  openSheet(h);
+}
+/* ---------- ajout / modification ---------- */
+function formParcel(p){
+  p=p||{};S.sheet={k:'fparcel',id:p.id||null,carrier:p.carrier||''};
+  var h='<h2>'+(p.id?'Modifier le colis':'Nouveau colis')+'</h2><p class="sub">Colle le numéro de suivi ou le lien reçu par mail : Kadokoli reconnaît le transporteur.</p><form id="fp">';
+  h+='<label class="field"><span>Numéro de suivi ou lien</span><input id="p-num" value="'+esc(p.num||'')+'" placeholder="ex. 6A12345678901" autocapitalize="characters" spellcheck="false" autocomplete="off" required'+(p.id?'':' autofocus')+'></label><div id="p-det"></div>';
+  h+='<label class="field"><span>Transporteur</span><select id="p-car">'+Object.keys(CARRIERS).map(function(k){return '<option value="'+k+'"'+((p.carrier||'')===k?' selected':'')+'>'+CARRIERS[k].n+'</option>'}).join('')+'</select></label>';
+  h+='<label class="field"><span>C\'est quoi ?</span><input id="p-name" value="'+esc(p.name||'')+'" placeholder="ex. Baskets running, cadeau de Léa…"></label>';
+  h+='<div class="two"><label class="field"><span>Boutique</span><input id="p-shop" value="'+esc(p.shop||'')+'" placeholder="ex. Vinted"></label><label class="field"><span>Livraison prévue</span><input id="p-eta" type="date" value="'+esc(p.eta||'')+'"></label></div>';
+  h+='<details'+(p.relay||p.pickupCode?' open':'')+'><summary class="small" style="margin:0 0 10px 4px;cursor:pointer">Point relais (facultatif)</summary><label class="field"><span>Point relais</span><input id="p-relay" value="'+esc(p.relay||'')+'" placeholder="ex. Tabac de la Gare, 3 rue…"></label><div class="two"><label class="field"><span>Code de retrait</span><input id="p-code" value="'+esc(p.pickupCode||'')+'"></label><label class="field"><span>À retirer avant</span><input id="p-by" type="date" value="'+esc(p.pickupBy||'')+'"></label></div></details>';
+  h+='<label class="field"><span>Notes</span><textarea id="p-notes" placeholder="Facultatif">'+esc(p.notes||'')+'</textarea></label>';
+  h+='<button type="submit" class="btn full">'+(p.id?'Enregistrer':'Suivre ce colis')+'</button></form>';
+  openSheet(h);detectUi();
+}
+function detectUi(){
+  var i=$('#p-num');if(!i)return;var r=detect(i.value),el=$('#p-det');
+  if(r.carrier&&!S.sheet.carrierLocked){$('#p-car').value=r.carrier}
+  el.innerHTML=r.carrier?'<div class="detected">✓ '+esc(CARRIERS[r.carrier].n)+' reconnu'+(r.num&&r.num!==i.value.trim().toUpperCase()?' · n° '+esc(r.num):'')+'</div>':(i.value.trim().length>5?'<p class="small" style="margin:-6px 4px 12px">Transporteur non reconnu : choisis-le dans la liste.</p>':'');
+}
+function formGift(g){
+  g=g||{type:'card'};S.sheet={k:'fgift',id:g.id||null,type:g.type||'card',photo:g.photo||''};
+  var h='<h2>'+(g.id?'Modifier':'Nouveau cadeau')+'</h2><p class="sub">Garde tout au même endroit : le code, le solde et la date limite.</p><form id="fg">';
+  h+='<div class="seg" id="g-type">'+GTYPES.map(function(t){return '<button type="button" data-gtype="'+t[0]+'" aria-pressed="'+(S.sheet.type===t[0])+'"><span>'+t[2]+'</span>'+t[1]+'</button>'}).join('')+'</div>';
+  h+='<label class="field"><span id="g-brandl">'+(S.sheet.type==='box'?'Marque du coffret':'Enseigne')+'</span><input id="g-brand" value="'+esc(g.brand||'')+'" placeholder="'+(S.sheet.type==='box'?'ex. Smartbox, Wonderbox…':'ex. Fnac, Decathlon, Sephora…')+'" required autofocus></label>';
+  h+='<label class="field" id="g-titlef"'+(S.sheet.type==='box'?'':' hidden')+'><span>Nom du coffret</span><input id="g-title" value="'+esc(g.title||'')+'" placeholder="ex. Séjour gourmand"></label>';
+  h+='<div class="two"><label class="field"><span>Montant</span><input id="g-amount" inputmode="decimal" value="'+esc(g.amount==null?'':g.amount)+'" placeholder="ex. 50"></label><label class="field"><span>Valable jusqu\'au</span><input id="g-expiry" type="date" value="'+esc(g.expiry||'')+'"></label></div>';
+  h+=g.id?'<label class="field"><span>Reste à dépenser</span><input id="g-balance" inputmode="decimal" value="'+esc(g.balance==null?'':g.balance)+'" placeholder="Laisse vide si rien n\'a été dépensé"></label>':'';
+  h+='<label class="field"><span>Numéro ou code</span><input id="g-code" value="'+esc(g.code||'')+'" autocapitalize="characters" spellcheck="false" placeholder="Le numéro au dos de la carte"><span class="hint">Il s\'affichera en grand avec un code-barres, prêt à présenter en caisse.</span></label>';
+  h+='<div class="two"><label class="field"><span>Code PIN</span><input id="g-pin" value="'+esc(g.pin||'')+'" inputmode="numeric" placeholder="Facultatif"></label><label class="field" id="g-persf"'+(S.sheet.type==='box'?'':' hidden')+'><span>Pour combien</span><input id="g-persons" type="number" min="1" value="'+esc(g.persons||'')+'" placeholder="ex. 2"></label></div>';
+  h+='<div class="two"><label class="field"><span>Offert par</span><input id="g-from" value="'+esc(g.from||'')+'" placeholder="ex. Mamie"></label><label class="field"><span>Où l\'utiliser</span><input id="g-where" value="'+esc(g.where||'')+'" placeholder="Site ou magasin"></label></div>';
+  h+='<label class="field"><span>Photo de la carte</span><input id="g-photo" type="file" accept="image/*"><span class="hint" id="g-photoh">'+(g.photo?'Une photo est enregistrée.':'Pratique pour garder le recto et le verso.')+'</span></label>';
+  h+='<label class="field"><span>Notes</span><textarea id="g-notes" placeholder="Facultatif">'+esc(g.notes||'')+'</textarea></label>';
+  h+='<button type="submit" class="btn pink full">'+(g.id?'Enregistrer':'Ajouter ce cadeau')+'</button></form>';
+  openSheet(h);
+}
+function chooseAdd(){
+  openSheet('<h2>Ajouter</h2><p class="sub">Qu\'est-ce que tu veux suivre ?</p><div class="seg" style="flex-direction:column">'+
+    '<button type="button" data-newparcel style="padding:16px"><span>📦</span><div style="text-align:left"><b>Un colis</b><div class="small">Avec son numéro de suivi</div></div></button>'+
+    '<button type="button" data-newgift style="padding:16px"><span>🎁</span><div style="text-align:left"><b>Un cadeau</b><div class="small">Carte cadeau, bon d\'achat, coffret, avoir…</div></div></button></div>');
+}
+
+/* ---------- suivi automatique La Poste (Colissimo, La Poste, Chronopost) ---------- */
+function lpMap(code){code=String(code||'');if(/^DI/.test(code))return 'delivered';if(/^(AG|RE1)/.test(code))return 'relay';if(/^MD/.test(code))return 'out';if(/^(ND|RE|RS)/.test(code))return 'issue';if(/^(ET|PB|DO|EP)/.test(code))return 'transit';if(/^PC/.test(code))return 'shipped';return ''}
+function refreshParcel(p,quiet){
+  var key=D.me.laposteKey;if(!key||!CARRIERS[p.carrier]||!CARRIERS[p.carrier].lp)return Promise.resolve(false);
+  return fetch('https://api.laposte.fr/suivi/v2/idships/'+encodeURIComponent(p.num)+'?lang=fr_FR',{headers:{'X-Okapi-Key':key,'Accept':'application/json'}}).then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j}})}).then(function(x){
+    var sh=x.j&&x.j.shipment;
+    if(!x.ok||!sh){if(!quiet)toast(x.j&&x.j.returnMessage?x.j.returnMessage:'Numéro inconnu chez La Poste pour l\'instant.');return false}
+    var ev=(sh.event||[]).map(function(e){return {label:e.label,date:e.date,code:e.code}});
+    ev.sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
+    if(ev.length){p.events=ev;var st=lpMap(ev[0].code);if(st)p.status=st}
+    if(sh.estimDate)p.eta=String(sh.estimDate).slice(0,10);
+    if(sh.deliveryDate&&p.status!=='delivered'&&/^DI/.test(ev[0]&&ev[0].code))p.status='delivered';
+    p.updated=Date.now();save();return true;
+  }).catch(function(){if(!quiet)toast('Pas de réponse de La Poste : vérifie ta connexion et ta clé.');return false});
+}
+function refreshAll(){
+  var L=D.parcels.filter(function(p){return p.status!=='delivered'&&CARRIERS[p.carrier]&&CARRIERS[p.carrier].lp&&(!p.updated||Date.now()-p.updated>20*60e3)});
+  if(!L.length||!D.me.laposteKey)return;
+  L.reduce(function(pr,p){return pr.then(function(){return refreshParcel(p,true)})},Promise.resolve()).then(function(){if(!S.sheet)render()});
+}
+
+/* ---------- rappels (notifications locales de l'appli Android) ---------- */
+function LN(){return window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications}
+function scheduleReminders(){
+  var N=LN();if(!NATIVE||!N)return;
+  clearTimeout(scheduleReminders.t);scheduleReminders.t=setTimeout(function(){
+    N.getPending().then(function(r){var ids=(r&&r.notifications||[]).map(function(n){return {id:n.id}});return ids.length?N.cancel({notifications:ids}):null}).catch(function(){}).then(function(){
+      if(!D.me.notif)return;
+      var list=[],id=1,now=Date.now();
+      var at=function(dateStr,daysBefore){var d=pdate(dateStr);if(!d)return null;d.setDate(d.getDate()-daysBefore);d.setHours(10,0,0,0);return d.getTime()>now?d:null};
+      D.gifts.forEach(function(g){if(g.used||!g.expiry)return;[[30,'dans 30 jours'],[7,'dans 7 jours'],[1,'demain']].forEach(function(o){var d=at(g.expiry,o[0]);if(d)list.push({id:id++,title:'🎁 '+(g.brand||'Ton cadeau')+' expire '+o[1],body:(bal(g)!=null?money(bal(g))+' à dépenser':'Pense à l\'utiliser')+' avant le '+fShort.format(pdate(g.expiry))+'.',schedule:{at:d,allowWhileIdle:true}})})});
+      D.parcels.forEach(function(p){if(p.status!=='relay'||!p.pickupBy)return;var d=at(p.pickupBy,1);if(d)list.push({id:id++,title:'📍 Colis à retirer avant demain',body:(p.name||'Ton colis')+(p.relay?' · '+p.relay:''),schedule:{at:d,allowWhileIdle:true}})});
+      if(list.length)N.schedule({notifications:list.slice(0,60)}).catch(function(){});
+    });
+  },800);
+}
+function askNotif(){var N=LN();if(!NATIVE||!N)return Promise.resolve();return N.checkPermissions().then(function(p){if(p.display!=='granted')return N.requestPermissions()}).catch(function(){})}
+
+/* ---------- mises à jour ---------- */
+function checkUpdate(manual){
+  S.update=Object.assign(S.update||{},{loading:true});if(S.tab==='me'&&!S.sheet)render();
+  return fetch('https://api.github.com/repos/'+REPO+'/releases/latest',{headers:{Accept:'application/vnd.github+json'}}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){
+    var n=+(String(j.tag_name||'').split('.')[1]||0);
+    S.update={checked:true,tag:j.tag_name,notes:(j.body||'').split('\n')[0],newer:APP_BUILD>0&&n>APP_BUILD,latest:n};
+    if(manual&&!S.update.newer&&APP_BUILD)toast('Tu as déjà la dernière version.');
+  }).catch(function(){S.update={checked:false};if(manual)toast('Impossible de vérifier : vérifie ta connexion.')}).then(function(){if(S.tab==='me'&&!S.sheet)render()});
+}
+
+/* ---------- code-barres ---------- */
+function drawBarcodes(){
+  if(!window.JsBarcode)return;
+  [].forEach.call(document.querySelectorAll('svg[data-barcode]:not([data-done])'),function(s){
+    try{JsBarcode(s,s.getAttribute('data-barcode'),{format:'CODE128',displayValue:false,height:70,margin:4,width:2});s.setAttribute('data-done','1')}catch(e){s.parentNode.style.display='none'}
+  });
+}
+
+/* ---------- photo de carte (réduite pour rester légère) ---------- */
+function shrink(file){return new Promise(function(res,rej){var u=URL.createObjectURL(file),im=new Image();im.onload=function(){var s=Math.min(1,1100/Math.max(im.naturalWidth,im.naturalHeight)),c=document.createElement('canvas');c.width=Math.round(im.naturalWidth*s);c.height=Math.round(im.naturalHeight*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',.78))};im.onerror=function(){URL.revokeObjectURL(u);rej(new Error('Image illisible'))};im.src=u})}
+
+/* ---------- événements ---------- */
+document.addEventListener('click',function(e){
+  var t=e.target.closest('button,a,[data-scrim]');if(!t)return;
+  var d=t.dataset;
+  if(t.hasAttribute('data-scrim')){if(e.target===t)closeSheet();return}
+  if(d.tab){S.tab=d.tab;closeSheet(true);render();window.scrollTo(0,0);if(d.tab==='me'&&!S.update)checkUpdate(false);return}
+  if(t.hasAttribute('data-add')){if(S.tab==='gifts')formGift();else if(S.tab==='parcels')formParcel();else chooseAdd();return}
+  if(t.hasAttribute('data-newparcel')){S.tab='parcels';render();formParcel();return}
+  if(t.hasAttribute('data-newgift')){S.tab='gifts';render();formGift();return}
+  if(d.parcel){var p=find('parcels',d.parcel);if(p)sheetParcel(p);return}
+  if(d.gift){var g=find('gifts',d.gift);if(g)sheetGift(g);return}
+  if(d.gfilter){S.gfilter=d.gfilter;render();return}
+  if(t.hasAttribute('data-toggledel')){S.showDelivered=!S.showDelivered;render();return}
+  if(d.copy!=null&&d.copy!==''){copy(d.copy);return}
+  if(d.setstatus){var p2=find('parcels',S.sheet.id);p2.status=d.setstatus;p2.updated=Date.now();if(!p2.events)p2.events=[];p2.events.unshift({label:STATUS[d.setstatus].t+' (mis à jour par toi)',date:new Date().toISOString()});save();sheetParcel(p2);if(d.setstatus==='delivered')toast('Livré 🎉');return}
+  if(d.refresh){var p3=find('parcels',d.refresh);t.disabled=true;refreshParcel(p3,false).then(function(ok){if(ok){toast('Suivi mis à jour');sheetParcel(p3)}else t.disabled=false});return}
+  if(d.editparcel){formParcel(find('parcels',d.editparcel));return}
+  if(d.editgift){formGift(find('gifts',d.editgift));return}
+  if(d.del){var k=d.del.split(':');if(!t.hasAttribute('data-sure')){t.setAttribute('data-sure','1');t.textContent='Confirmer la suppression';return}
+    D[k[0]==='parcel'?'parcels':'gifts']=D[k[0]==='parcel'?'parcels':'gifts'].filter(function(x){return x.id!==k[1]});save();closeSheet();toast('Supprimé');return}
+  if(d.gtype){S.sheet.type=d.gtype;[].forEach.call(document.querySelectorAll('[data-gtype]'),function(b){b.setAttribute('aria-pressed',b.dataset.gtype===d.gtype)});var box=d.gtype==='box';$('#g-titlef').hidden=!box;$('#g-persf').hidden=!box;$('#g-brandl').textContent=box?'Marque du coffret':'Enseigne';$('#g-brand').placeholder=box?'ex. Smartbox, Wonderbox…':'ex. Fnac, Decathlon, Sephora…';return}
+  if(d.spend){var g2=find('gifts',d.spend),v=num($('#f-spend').value);if(!v||v<=0){toast('Indique le montant dépensé.');return}
+    var nb=Math.max(0,Math.round(((bal(g2)||0)-v)*100)/100);g2.balance=nb;(g2.uses=g2.uses||[]).unshift({at:Date.now(),amount:v});if(nb===0)g2.used=true;save();sheetGift(g2);toast(nb===0?'Carte entièrement utilisée 🎉':'Il reste '+money(nb));return}
+  if(d.use){var g3=find('gifts',d.use);g3.used=true;save();closeSheet();toast('Bien profité ! 🎉');return}
+  if(d.unuse){var g4=find('gifts',d.unuse);g4.used=false;save();sheetGift(g4);return}
+  if(t.hasAttribute('data-showpin')){var pe=$('[data-pin]');pe.textContent=pe.textContent.indexOf('•')===0?pe.getAttribute('data-pin'):'••••';t.textContent=pe.textContent.indexOf('•')===0?'Afficher':'Masquer';return}
+  if(d.shareparcel){var p4=find('parcels',d.shareparcel),c=CARRIERS[p4.carrier]||CARRIERS.other;share(p4.name||'Colis','📦 '+(p4.name||'Colis')+(p4.shop?' ('+p4.shop+')':'')+'\n'+(STATUS[p4.status]||STATUS.ordered).t+(p4.eta?' · prévu le '+fShort.format(pdate(p4.eta)):'')+'\n'+c.n+' n° '+p4.num,trackUrl(p4));return}
+  if(d.sharegift){var g5=find('gifts',d.sharegift);share(g5.brand||'Cadeau','🎁 '+(GT[g5.type]||GT.card).n+' '+(g5.brand||'')+(g5.title?' – '+g5.title:'')+(bal(g5)!=null?'\nSolde : '+money(bal(g5)):'')+(g5.expiry?'\nValable jusqu\'au '+fShort.format(pdate(g5.expiry)):'')+(g5.code?'\nCode : '+g5.code:'')+(g5.pin?'\nPIN : '+g5.pin:''));return}
+  if(t.hasAttribute('data-shareapp')){share('Kadokoli','Je suis mes colis et mes cartes cadeaux avec Kadokoli. Télécharge l\'appli (Android) :',APK_URL);return}
+  if(t.hasAttribute('data-checkupd')){checkUpdate(true);return}
+  if(t.hasAttribute('data-download')){toast('Téléchargement lancé… ouvre ensuite le fichier pour installer.');if(NATIVE)location.href=APK_URL;else window.open(APK_URL,'_blank');return}
+  if(t.hasAttribute('data-export')){var fname='kadokoli-sauvegarde-'+ymd(new Date())+'.json',json=JSON.stringify(D,null,1);
+    if(NATIVE&&PL('Filesystem')&&PL('Share')){PL('Filesystem').writeFile({path:fname,data:json,directory:'CACHE',encoding:'utf8'}).then(function(r){return PL('Share').share({title:'Sauvegarde Kadokoli',files:[r.uri],dialogTitle:'Enregistrer ou envoyer la sauvegarde'})}).catch(function(){toast('Export impossible.')});return}
+    var blob=new Blob([JSON.stringify(D,null,1)],{type:'application/json'}),a2=document.createElement('a');a2.href=URL.createObjectURL(blob);a2.download='kadokoli-sauvegarde-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a2);a2.click();a2.remove();toast('Sauvegarde exportée');return}
+});
+document.addEventListener('input',function(e){
+  if(e.target.id==='p-num')detectUi();
+  if(e.target.id==='f-name'){D.me.name=e.target.value.trim();save()}
+  if(e.target.id==='f-lpkey'){D.me.laposteKey=e.target.value.trim();save()}
+});
+document.addEventListener('change',function(e){
+  var t=e.target;
+  if(t.id==='p-car'&&S.sheet)S.sheet.carrierLocked=true;
+  if(t.hasAttribute&&t.hasAttribute('data-notif')){D.me.notif=t.checked;save();if(t.checked)askNotif();return}
+  if(t.id==='g-photo'&&t.files[0]){$('#g-photoh').textContent='Préparation…';shrink(t.files[0]).then(function(u){S.sheet.photo=u;$('#g-photoh').textContent='Photo prête ✓'},function(err){$('#g-photoh').textContent=err.message})}
+  if(t.id==='f-import'&&t.files[0]){var r=new FileReader();r.onload=function(){try{var x=JSON.parse(r.result);if(!x||!Array.isArray(x.parcels)||!Array.isArray(x.gifts))throw 0;
+      var add=function(k){var ids={};D[k].forEach(function(o){ids[o.id]=1});x[k].forEach(function(o){if(!ids[o.id])D[k].push(o)})};add('parcels');add('gifts');save();render();toast('Importé : '+x.parcels.length+' colis, '+x.gifts.length+' cadeaux')}catch(err){toast('Ce fichier n\'est pas une sauvegarde Kadokoli.')}};r.readAsText(t.files[0])}
+});
+document.addEventListener('submit',function(e){
+  e.preventDefault();var f=e.target,v=function(id){var el=$('#'+id);return el?el.value.trim():''};
+  if(f.id==='fp'){
+    var r=detect(v('p-num'));if(!r.num){toast('Indique le numéro de suivi.');return}
+    var raw=v('p-num'),o=S.sheet.id?find('parcels',S.sheet.id):{id:uid(),at:Date.now(),status:'ordered',events:[]};
+    o.num=r.num;o.link=/^https?:/i.test(raw)?raw:'';o.carrier=v('p-car')||r.carrier||'other';o.name=v('p-name');o.shop=v('p-shop');o.eta=v('p-eta');o.relay=v('p-relay');o.pickupCode=v('p-code');o.pickupBy=v('p-by');o.notes=v('p-notes');
+    if(o.relay&&o.status==='ordered')o.status='relay';
+    if(!S.sheet.id)D.parcels.push(o);save();closeSheet(true);S.tab='parcels';render();sheetParcel(o);
+    refreshParcel(o,true).then(function(ok){if(ok&&S.sheet&&S.sheet.id===o.id)sheetParcel(o)});
+    toast(S.sheet&&S.sheet.id===o.id?'Colis suivi ✓':'Enregistré');return;
+  }
+  if(f.id==='fg'){
+    if(!v('g-brand')){toast('Indique l\'enseigne.');return}
+    var g=S.sheet.id?find('gifts',S.sheet.id):{id:uid(),at:Date.now(),uses:[]};
+    g.type=S.sheet.type;g.brand=v('g-brand');g.title=g.type==='box'?v('g-title'):'';g.amount=num(v('g-amount'));g.expiry=v('g-expiry');g.code=v('g-code');g.pin=v('g-pin');
+    g.persons=g.type==='box'?(+v('g-persons')||null):null;g.from=v('g-from');g.where=v('g-where');g.notes=v('g-notes');if(S.sheet.photo)g.photo=S.sheet.photo;
+    if($('#g-balance'))g.balance=num(v('g-balance'));
+    var isNew=!S.sheet.id;if(isNew)D.gifts.push(g);save();if(isNew&&D.me.notif)askNotif();closeSheet(true);S.tab='gifts';render();sheetGift(g);toast(isNew?'Cadeau ajouté ✓':'Enregistré');
+  }
+});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&$('#layer').firstChild)closeSheet()});
+try{if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.App)window.Capacitor.Plugins.App.addListener('backButton',function(){if($('#layer').firstChild)closeSheet();else if(S.tab!=='parcels'){S.tab='parcels';render()}else window.Capacitor.Plugins.App.exitApp()})}catch(e){}
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')refreshAll()});
+function find(k,id){return D[k].filter(function(x){return x.id===id})[0]}
+
+/* ---------- QR code (pour partager l'appli) : générateur minimal, version auto, correction M ---------- */
+/*@@QR@@*/
+
+/* démo : au tout premier lancement, quelques exemples pour voir à quoi ça ressemble */
+if(!D.seen){D.seen=1;var dd=function(n){var x=today();x.setDate(x.getDate()+n);return ymd(x)};
+  D.parcels=[{id:uid(),at:Date.now(),num:'6A12345678901',carrier:'colissimo',name:'Baskets de running',shop:'Decathlon',status:'out',eta:dd(0),events:[{label:'Votre colis est en cours de livraison',date:new Date().toISOString()},{label:'Votre colis est arrivé sur son site de distribution',date:new Date(Date.now()-864e5).toISOString()}],demo:1},
+    {id:uid(),at:Date.now(),num:'24680135',carrier:'mondialrelay',name:'Veste vintage',shop:'Vinted',status:'relay',relay:'Tabac Le Balto, 12 rue des Lilas',pickupCode:'4821',pickupBy:dd(5),events:[],demo:1},
+    {id:uid(),at:Date.now(),num:'1Z999AA10123456784',carrier:'ups',name:'Écouteurs',shop:'Boulanger',status:'transit',eta:dd(2),events:[],demo:1}];
+  D.gifts=[{id:uid(),at:Date.now(),type:'card',brand:'Fnac',amount:50,balance:32.5,expiry:dd(12),code:'6274 1234 5678 9012',pin:'4471',from:'Mamie',uses:[{at:Date.now()-5*864e5,amount:17.5}],demo:1},
+    {id:uid(),at:Date.now(),type:'box',brand:'Smartbox',title:'Séjour gourmand',amount:149.9,expiry:dd(120),code:'SB-8841-2290',persons:2,uses:[],demo:1},
+    {id:uid(),at:Date.now(),type:'voucher',brand:'Decathlon',amount:20,expiry:dd(45),code:'DKT20OFF',uses:[],demo:1}];
+  save();
+}
+render();refreshAll();
+if(NATIVE)setTimeout(function(){checkUpdate(false)},2500);
+})();
+</script>
+</body>
+</html>

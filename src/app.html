@@ -3,22 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#F6F4FF">
+<meta name="theme-color" content="#F2F6FC">
 <title>Kadokoli</title>
 <link rel="icon" href="icon-192.png">
 <style>
 /*@@FONTS@@*/
-/* Kadokoli — colis & cadeaux. Palette tirée du plumage du colibri : iris, émeraude, nectar, ciel, pollen. */
+/* Kadokoli — colis & cadeaux. Palette tirée du logo : bleu nuit, bleu de la flèche, magenta du ruban, jaune du paquet, turquoise. */
 :root{
-  --bg:#F6F4FF; --surface:#FFFFFF; --ink:#1D1640; --muted:#6E6890; --line:#E6E1FA;
-  --iris:#6C4CF1; --iris-2:#8F76FF; --iris-soft:#ECE7FF;
+  --bg:#F2F6FC; --surface:#FFFFFF; --ink:#14284F; --muted:#5E6B86; --line:#DCE5F2;
+  --iris:#2476D9; --iris-2:#5B9BEA; --iris-soft:#E2EDFB;
   --emerald:#0FB989; --emerald-soft:#DDF7EE;
-  --nectar:#FF4F8B; --nectar-soft:#FFE3ED;
-  --sky:#22B8E6; --sky-soft:#DDF4FC;
-  --pollen:#FFB21E; --pollen-soft:#FFF1D2;
+  --nectar:#D9338C; --nectar-soft:#FBE3F0;
+  --sky:#1A9A8E; --sky-soft:#DAF2EF;
+  --pollen:#F2B630; --pollen-soft:#FDF2D5;
   --danger:#E5484D;
   --r-lg:26px; --r-md:18px; --r-sm:12px;
-  --shadow:0 10px 30px -12px rgba(48,28,140,.28);
+  --shadow:0 10px 30px -12px rgba(20,40,79,.25);
   --display:"Bricolage Grotesque",ui-rounded,system-ui,sans-serif;
   --body:"Figtree",system-ui,-apple-system,sans-serif;
 }
@@ -33,11 +33,12 @@ h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:-.01em}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
 .hello{font-size:.95rem;color:var(--muted)}
 h1{font-size:2.05rem;font-weight:800;line-height:1.05}
-.bird{width:44px;height:44px;flex:none}
+.bird{width:46px;height:46px;flex:none;border-radius:13px;box-shadow:0 6px 16px -6px rgba(23,64,127,.55)}
+.elogo{width:84px;height:84px;border-radius:22px;display:block;margin:0 auto 12px}
 /* ---- résumé en tête d'onglet ---- */
 .hero{border-radius:var(--r-lg);padding:20px 20px 18px;color:#fff;position:relative;overflow:hidden;margin-bottom:22px;box-shadow:var(--shadow)}
-.hero.parcels{background:linear-gradient(135deg,#6C4CF1 0%,#22B8E6 100%)}
-.hero.gifts{background:linear-gradient(135deg,#FF4F8B 0%,#FFB21E 100%)}
+.hero.parcels{background:linear-gradient(45deg,#17407F 0%,#1E6FB0 55%,#1A9A8E 100%)}
+.hero.gifts{background:linear-gradient(135deg,#D9338C 0%,#F2A630 100%)}
 .hero .big{font-family:var(--display);font-weight:800;font-size:2.7rem;line-height:1}
 .hero p{margin:6px 0 0;opacity:.95}
 .hero .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
@@ -63,10 +64,12 @@ h1{font-size:2.05rem;font-weight:800;line-height:1.05}
 .journey .done{position:absolute;left:0;top:13.5px;height:6px;border-radius:6px;background:linear-gradient(90deg,var(--iris),var(--sky))}
 .journey .dot{position:absolute;top:10px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:var(--surface);border:3px solid var(--line)}
 .journey .dot.on{border-color:var(--iris);background:var(--iris)}
-.journey .flyer{position:absolute;top:-4px;width:30px;height:30px;margin-left:-15px;transition:left .8s cubic-bezier(.3,1.4,.5,1)}
+.journey .flyer{position:absolute;top:2px;width:28px;height:28px;margin-left:-14px;border-radius:9px;overflow:hidden;box-shadow:0 0 0 3px var(--surface),0 4px 10px -3px rgba(23,64,127,.6);transition:left .8s cubic-bezier(.3,1.4,.5,1)}
+.journey .flyer img{width:100%;height:100%;display:block}
+.journey .flyer.bad{box-shadow:0 0 0 3px var(--danger)}
 .journey.big{height:44px;margin:12px 10px 4px}
 .journey.big .track{top:22px}.journey.big .done{top:20.5px}.journey.big .dot{top:16px;width:18px;height:18px;margin-left:-9px}
-.journey.big .flyer{top:-6px;width:38px;height:38px;margin-left:-19px}
+.journey.big .flyer{top:4px;width:36px;height:36px;margin-left:-18px;border-radius:11px}
 .jlabels{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin:0 -4px 6px}
 .jlabels span{width:20%;text-align:center}
 .jlabels span.on{color:var(--ink);font-weight:700}
@@ -117,10 +120,10 @@ nav.tabs .in{display:flex;gap:6px;max-width:640px;width:100%;align-items:center}
 nav.tabs button.tab{flex:1;border:0;background:transparent;border-radius:16px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.78rem;font-weight:600;color:var(--muted)}
 nav.tabs button.tab svg{width:24px;height:24px}
 nav.tabs button.tab[aria-current="page"]{color:var(--iris);background:var(--iris-soft)}
-nav.tabs .add{width:58px;height:58px;border-radius:20px;border:0;background:linear-gradient(135deg,var(--nectar),var(--iris));color:#fff;display:grid;place-items:center;box-shadow:0 10px 24px -8px rgba(108,76,241,.7);margin:-26px 6px 0}
+nav.tabs .add{width:58px;height:58px;border-radius:20px;border:0;background:linear-gradient(135deg,var(--nectar),var(--iris));color:#fff;display:grid;place-items:center;box-shadow:0 10px 24px -8px rgba(36,118,217,.6);margin:-26px 6px 0}
 nav.tabs .add svg{width:28px;height:28px}
 /* ---- feuilles (détail, ajout) ---- */
-.scrim{position:fixed;inset:0;background:rgba(29,22,64,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center;animation:fade .2s ease}
+.scrim{position:fixed;inset:0;background:rgba(20,40,79,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center;animation:fade .2s ease}
 .sheet{background:var(--bg);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:28px 28px 0 0;padding:10px 18px calc(22px + env(safe-area-inset-bottom));animation:up .28s cubic-bezier(.2,.9,.3,1.05)}
 .grab{width:44px;height:5px;border-radius:5px;background:var(--line);margin:4px auto 12px}
 .sheet h2{font-size:1.45rem;font-weight:800;margin-bottom:4px}
@@ -185,6 +188,8 @@ nav.tabs .add svg{width:28px;height:28px}
 var APP_BUILD=0; /* remplacé par le numéro de version au moment de construire l'APK */
 var REPO='Nagromc86/kadokoli';
 var APK_URL='https://github.com/'+REPO+'/releases/latest/download/kadokoli.apk';
+var LOGO='/*@@LOGO@@*/';
+function logo(cls){return '<img class="'+(cls||'logo')+'" src="'+LOGO+'" alt="">'}
 var NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 var KEY='kadokoli:v1';
 
@@ -192,7 +197,7 @@ var KEY='kadokoli:v1';
 var D=load();
 function blank(){return {parcels:[],gifts:[],me:{name:'',notif:true,laposteKey:''},seen:0}}
 function load(){try{var d=JSON.parse(localStorage.getItem(KEY)||'null');if(d&&d.parcels)return Object.assign(blank(),d)}catch(e){}return blank()}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){toast('Mémoire pleine : supprime des photos de cartes.')}scheduleReminders()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){toast('Mémoire pleine : supprime des photos de cartes.')}scheduleReminders();pushWidgets()}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 var S={tab:'parcels',gfilter:'all',sheet:null,showDelivered:false,update:null};
 
@@ -236,13 +241,6 @@ var IC={
   refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11a8 8 0 10-2.3 5.7M20 4v7h-7"/></svg>',
   down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg>'
 };
-/* le colibri, dessiné pour l'appli (et réutilisé comme « curseur » du trajet des colis) */
-function bird(c){c=c||'#6C4CF1';var id='kb'+c.slice(1);return '<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="'+id+'" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#0FB989"/><stop offset=".5" stop-color="'+c+'"/><stop offset="1" stop-color="#FF4F8B"/></linearGradient></defs>'+
-  '<path d="M41 21.5L62 15.5L41.5 25z" fill="#1D1640"/>'+
-  '<path d="M14 56l6-14c3-9 9-17 16-21 5-2 8 1 7 5-1 7-8 13-15 18l-8 5 3 9-6-6z" fill="url(#'+id+')"/>'+
-  '<path d="M31 26C25 18 24 9 29 2c6 6 9 14 7 22z" fill="#FFB21E"/>'+
-  '<path d="M29 27C20 22 13 14 12 5c8 3 15 9 18 18z" fill="'+c+'" opacity=".55"/>'+
-  '<circle cx="38" cy="22" r="1.9" fill="#1D1640"/></svg>'}
 
 /* ---------- transporteurs ---------- */
 var CARRIERS={
@@ -291,7 +289,7 @@ function stepOf(p){return (STATUS[p.status]||STATUS.ordered).s}
 function journey(p,big){
   var st=stepOf(p),pct=st/4*100,h='<div class="journey'+(big?' big':'')+'" aria-hidden="true"><div class="track"></div><div class="done" style="width:'+pct+'%"></div>';
   for(var i=0;i<5;i++)h+='<span class="dot'+(i<=st?' on':'')+'" style="left:'+(i*25)+'%"></span>';
-  return h+'<span class="flyer" style="left:'+pct+'%">'+bird(p.status==='issue'?'#E5484D':'#6C4CF1')+'</span></div>';
+  return h+'<span class="flyer'+(p.status==='issue'?' bad':'')+'" style="left:'+pct+'%">'+logo('fl')+'</span></div>';
 }
 function statusLine(p){
   var s=STATUS[p.status]||STATUS.ordered,last=(p.events||[])[0],eta=p.eta&&p.status!=='delivered'?daysTo(p.eta):null;
@@ -305,7 +303,7 @@ function statusLine(p){
 /* ---------- cartes cadeaux ---------- */
 var GTYPES=[['card','Carte cadeau','💳'],['voucher','Bon d\'achat','🎟️'],['box','Coffret','🎁'],['ecard','E-carte','📱'],['credit','Avoir','🧾']];
 var GT={};GTYPES.forEach(function(t){GT[t[0]]={n:t[1],e:t[2]}});
-var GRAD=[['#6C4CF1','#22B8E6'],['#FF4F8B','#FFB21E'],['#0FB989','#22B8E6'],['#8F76FF','#FF4F8B'],['#FF7A45','#FF4F8B'],['#1D9BF0','#0FB989'],['#B44CF1','#6C4CF1'],['#FFB21E','#0FB989']];
+var GRAD=[['#2476D9','#1A9A8E'],['#FF4F8B','#FFB21E'],['#0FB989','#22B8E6'],['#8F76FF','#FF4F8B'],['#FF7A45','#FF4F8B'],['#1D9BF0','#0FB989'],['#B44CF1','#6C4CF1'],['#FFB21E','#0FB989']];
 var BRANDS={fnac:['#F2A200','#E05A00'],decathlon:['#0082C3','#22B8E6'],smartbox:['#FF4F8B','#FF7A45'],wonderbox:['#E5484D','#FF4F8B'],amazon:['#232F3E','#FF9900'],sephora:['#1D1640','#6C4CF1'],ikea:['#0058A3','#1D9BF0'],zalando:['#FF6900','#FF4F8B'],cultura:['#6C2C91','#B44CF1'],darty:['#E30613','#FF7A45'],boulanger:['#F37021','#FFB21E'],leroymerlin:['#4F9A2A','#0FB989'],carrefour:['#0055A5','#22B8E6'],leclerc:['#0066B3','#0FB989'],nocibe:['#1D1640','#FF4F8B'],kiabi:['#003D7C','#22B8E6'],apple:['#1D1640','#6E6890'],netflix:['#B20710','#E50914'],spotify:['#1DB954','#0FB989'],tictactrip:['#6C4CF1','#FF4F8B'],illicado:['#E5007E','#FF4F8B'],cadhoc:['#E85D04','#FFB21E']};
 function gradOf(g){var k=String(g.brand||'').toLowerCase().normalize('NFD').replace(/[^a-z]/g,'');var p=BRANDS[k]||GRAD[hash((g.brand||'')+(g.type||''))%GRAD.length];return 'linear-gradient(135deg,'+p[0]+','+p[1]+')'}
 function bal(g){var b=num(g.balance);return b==null?num(g.amount):b}
@@ -341,15 +339,15 @@ function render(){
 function tab(k,l,ic){return '<button type="button" class="tab" data-tab="'+k+'"'+(S.tab===k?' aria-current="page"':'')+'>'+ic+'<span>'+l+'</span></button>'}
 function header(title){
   var n=D.me.name?'Salut '+esc(D.me.name)+' 👋':'Salut 👋';
-  return '<div class="top"><div><div class="hello">'+n+'</div><h1>'+title+'</h1></div><div class="bird">'+bird()+'</div></div>';
+  return '<div class="top"><div><div class="hello">'+n+'</div><h1>'+title+'</h1></div>'+logo('bird')+'</div>';
 }
 function viewParcels(){
   var P=D.parcels.slice().sort(function(a,b){return (a.eta||'9999').localeCompare(b.eta||'9999')||(b.at-a.at)});
   var act=P.filter(function(p){return p.status!=='delivered'}),dlv=P.filter(function(p){return p.status==='delivered'});
   var relay=act.filter(function(p){return p.status==='relay'}),todayP=act.filter(function(p){return p.status==='out'||(p.eta&&daysTo(p.eta)===0)});
   var h=header('Mes colis');
-  if(!P.length)return h+'<div class="empty">'+bird()+'<h3>Aucun colis en route</h3><p>Colle un numéro de suivi : Kadokoli reconnaît le transporteur et te dit où en est ton colis.</p><button type="button" class="btn" data-add>'+IC.plus+'Ajouter un colis</button></div>';
-  h+='<div class="hero parcels"><svg class="deco" viewBox="0 0 64 64">'+bird('#ffffff').replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'')+'</svg><div class="big">'+act.length+'</div><p>'+(act.length>1?'colis en route':act.length?'colis en route':'Tout est arrivé 🎉')+'</p><div class="pills">'+
+  if(!P.length)return h+'<div class="empty">'+logo('elogo')+'<h3>Aucun colis en route</h3><p>Colle un numéro de suivi : Kadokoli reconnaît le transporteur et te dit où en est ton colis.</p><button type="button" class="btn" data-add>'+IC.plus+'Ajouter un colis</button></div>';
+  h+='<div class="hero parcels"><div class="big">'+act.length+'</div><p>'+(act.length>1?'colis en route':act.length?'colis en route':'Tout est arrivé 🎉')+'</p><div class="pills">'+
     (todayP.length?'<span class="pill">🚚 '+todayP.length+' aujourd\'hui</span>':'')+(relay.length?'<span class="pill">📍 '+relay.length+' à retirer</span>':'')+(dlv.length?'<span class="pill">✓ '+dlv.length+' livré'+(dlv.length>1?'s':'')+'</span>':'')+'</div></div>';
   if(relay.length)h+=group('À retirer en point relais',relay);
   var rest=act.filter(function(p){return relay.indexOf(p)<0});
@@ -369,7 +367,7 @@ function viewGifts(){
   var live=G.filter(function(g){var d=daysTo(g.expiry);return !g.used&&(d==null||d>=0)});
   var total=live.reduce(function(s,g){return s+(bal(g)||0)},0),soon=live.filter(function(g){var d=daysTo(g.expiry);return d!=null&&d<=30});
   var h=header('Mes cadeaux');
-  if(!G.length)return h+'<div class="empty">'+bird('#FF4F8B')+'<h3>Pas encore de carte cadeau</h3><p>Ajoute tes cartes cadeaux, bons d\'achat et coffrets : Kadokoli te prévient avant qu\'ils expirent et garde le code à portée de main en caisse.</p><button type="button" class="btn pink" data-add>'+IC.plus+'Ajouter un cadeau</button></div>';
+  if(!G.length)return h+'<div class="empty">'+logo('elogo')+'<h3>Pas encore de carte cadeau</h3><p>Ajoute tes cartes cadeaux, bons d\'achat et coffrets : Kadokoli te prévient avant qu\'ils expirent et garde le code à portée de main en caisse.</p><button type="button" class="btn pink" data-add>'+IC.plus+'Ajouter un cadeau</button></div>';
   h+='<div class="hero gifts"><div class="big">'+esc(money(total))+'</div><p>à dépenser sur '+live.length+' carte'+(live.length>1?'s':'')+' et bon'+(live.length>1?'s':'')+'</p><div class="pills">'+
     (soon.length?'<span class="pill">⏳ '+soon.length+' expire'+(soon.length>1?'nt':'')+' dans le mois</span>':'<span class="pill">Rien n\'expire ce mois-ci</span>')+'</div></div>';
   var f=S.gfilter,L=G.filter(function(g){return f==='all'||(f==='used'?(g.used||daysTo(g.expiry)<0):g.type===f&&!g.used)});
@@ -499,6 +497,19 @@ function refreshAll(){
   L.reduce(function(pr,p){return pr.then(function(){return refreshParcel(p,true)})},Promise.resolve()).then(function(){if(!S.sheet)render()});
 }
 
+/* ---------- widgets Android : total à dépenser, colis en attente ---------- */
+function summary(){
+  var live=D.gifts.filter(function(g){var d=daysTo(g.expiry);return !g.used&&(d==null||d>=0)});
+  var total=live.reduce(function(s,g){return s+(bal(g)||0)},0);
+  var soon=live.filter(function(g){var d=daysTo(g.expiry);return d!=null&&d<=30}).length;
+  var act=D.parcels.filter(function(p){return p.status!=='delivered'});
+  var relay=act.filter(function(p){return p.status==='relay'}).length,tod=act.filter(function(p){return p.status==='out'||(p.eta&&daysTo(p.eta)===0)}).length;
+  return {gifts:{label:'À dépenser',big:money(total),sub:soon?(soon+' expire'+(soon>1?'nt':'')+' dans le mois'):live.length?live.length+' carte'+(live.length>1?'s':'')+' et bons':'Aucune carte'},
+    parcels:{label:act.length>1?'Colis en attente':'Colis en attente',big:String(act.length),sub:[relay?relay+' à retirer':'',tod?tod+" aujourd'hui":''].filter(Boolean).join(' · ')||(act.length?'En route':'Tout est arrivé')}};
+}
+function pushWidgets(){var W=PL('KadoWidgets');if(!NATIVE||!W)return;clearTimeout(pushWidgets.t);pushWidgets.t=setTimeout(function(){W.setSummary({json:JSON.stringify(summary())}).catch(function(){})},300)}
+function goTab(t){if(t!=='gifts'&&t!=='parcels')return;closeSheet(true);S.tab=t;render();window.scrollTo(0,0)}
+
 /* ---------- rappels (notifications locales de l'appli Android) ---------- */
 function LN(){return window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications}
 function scheduleReminders(){
@@ -607,7 +618,7 @@ document.addEventListener('submit',function(e){
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&$('#layer').firstChild)closeSheet()});
 try{if(window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.App)window.Capacitor.Plugins.App.addListener('backButton',function(){if($('#layer').firstChild)closeSheet();else if(S.tab!=='parcels'){S.tab='parcels';render()}else window.Capacitor.Plugins.App.exitApp()})}catch(e){}
-document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')refreshAll()});
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'){refreshAll();pushWidgets();if(!S.sheet)render()}});
 function find(k,id){return D[k].filter(function(x){return x.id===id})[0]}
 
 /* ---------- QR code (pour partager l'appli) : générateur minimal, version auto, correction M ---------- */
@@ -623,7 +634,8 @@ if(!D.seen){D.seen=1;var dd=function(n){var x=today();x.setDate(x.getDate()+n);r
     {id:uid(),at:Date.now(),type:'voucher',brand:'Decathlon',amount:20,expiry:dd(45),code:'DKT20OFF',uses:[],demo:1}];
   save();
 }
-render();refreshAll();
+render();refreshAll();pushWidgets();
+(function(){var W=PL('KadoWidgets');if(!NATIVE||!W)return;W.takeLaunch().then(function(r){if(r&&r.tab)goTab(r.tab)}).catch(function(){});try{W.addListener('tab',function(r){goTab(r&&r.tab)})}catch(e){}})();
 if(NATIVE)setTimeout(function(){checkUpdate(false)},2500);
 })();
 </script>

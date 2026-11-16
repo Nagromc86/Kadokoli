@@ -21,6 +21,7 @@ function qrSvg(text){
 }
 '''
 s = s.replace('/*@@QR@@*/', qr)
+s = s.replace('/*@@LOGO@@*/', 'data:image/png;base64,' + base64.b64encode(open(os.path.join(V, 'logo.png'), 'rb').read()).decode())
 assert '@@' not in s, re.findall(r'/\*@@\w+@@\*/', s)
 open(os.path.join(R, 'index.html'), 'w', encoding='utf-8').write(s)
 print('index.html', len(s) // 1024, 'Ko')

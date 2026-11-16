@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kk_gifts_label">Kadokoli · À dépenser</string>
+    <string name="kk_gifts_desc">Le total de tes cartes cadeaux et bons encore valables</string>
+    <string name="kk_parcels_label">Kadokoli · Colis</string>
+    <string name="kk_parcels_desc">Le nombre de colis en attente de livraison</string>
+</resources>

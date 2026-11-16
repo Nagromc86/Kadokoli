@@ -1,0 +1,8 @@
+{
+  "name": "kadokoli-widgets",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Widgets Android de Kadokoli : total à dépenser et colis en attente",
+  "main": "index.js",
+  "capacitor": { "android": { "src": "android" } }
+}

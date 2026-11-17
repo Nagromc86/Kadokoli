@@ -3,9 +3,9 @@
   "appName": "Kadokoli",
   "webDir": "www",
   "server": { "androidScheme": "https" },
-  "android": { "allowMixedContent": false, "backgroundColor": "#F2F6FC" },
+  "android": { "allowMixedContent": false, "backgroundColor": "#F4F5F8" },
   "plugins": {
     "CapacitorHttp": { "enabled": true },
-    "LocalNotifications": { "iconColor": "#6C4CF1" }
+    "LocalNotifications": { "iconColor": "#2E4A78" }
   }
 }

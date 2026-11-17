@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#F2F6FC">
+<meta name="theme-color" content="#F4F5F8">
 <title>Kadokoli</title>
 <link rel="icon" href="icon-192.png">
 <style>
 /*@@FONTS@@*/
-/* Kadokoli — colis & cadeaux. Palette tirée du logo : bleu nuit, bleu de la flèche, magenta du ruban, jaune du paquet, turquoise. */
+/* Kadokoli — colis & cadeaux. Palette tirée du logo : bleu nuit, or du ruban, vert sauge et framboise du paquet. */
 :root{
-  --bg:#F2F6FC; --surface:#FFFFFF; --ink:#14284F; --muted:#5E6B86; --line:#DCE5F2;
-  --iris:#2476D9; --iris-2:#5B9BEA; --iris-soft:#E2EDFB;
-  --emerald:#0FB989; --emerald-soft:#DDF7EE;
-  --nectar:#D9338C; --nectar-soft:#FBE3F0;
-  --sky:#1A9A8E; --sky-soft:#DAF2EF;
-  --pollen:#F2B630; --pollen-soft:#FDF2D5;
+  --bg:#F4F5F8; --surface:#FFFFFF; --ink:#1B2A47; --muted:#5F6A80; --line:#E1E5EC;
+  --iris:#2E4A78; --iris-2:#5B77A6; --iris-soft:#E5EAF3;
+  --emerald:#3D9A7E; --emerald-soft:#DFF1EA;
+  --nectar:#C25A7E; --nectar-soft:#F7E4EB;
+  --sky:#4E9682; --sky-soft:#E1F0EB;
+  --pollen:#D9AE5F; --pollen-soft:#FAF0DC;
   --danger:#E5484D;
   --r-lg:26px; --r-md:18px; --r-sm:12px;
   --shadow:0 10px 30px -12px rgba(20,40,79,.25);
@@ -33,12 +33,12 @@ h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:-.01em}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
 .hello{font-size:.95rem;color:var(--muted)}
 h1{font-size:2.05rem;font-weight:800;line-height:1.05}
-.bird{width:46px;height:46px;flex:none;border-radius:13px;box-shadow:0 6px 16px -6px rgba(23,64,127,.55)}
+.bird{width:46px;height:46px;flex:none;border-radius:13px;box-shadow:0 6px 16px -6px rgba(31,51,85,.5)}
 .elogo{width:84px;height:84px;border-radius:22px;display:block;margin:0 auto 12px}
 /* ---- résumé en tête d'onglet ---- */
 .hero{border-radius:var(--r-lg);padding:20px 20px 18px;color:#fff;position:relative;overflow:hidden;margin-bottom:22px;box-shadow:var(--shadow)}
-.hero.parcels{background:linear-gradient(45deg,#17407F 0%,#1E6FB0 55%,#1A9A8E 100%)}
-.hero.gifts{background:linear-gradient(135deg,#D9338C 0%,#F2A630 100%)}
+.hero.parcels{background:linear-gradient(45deg,#1F3355 0%,#2E4A78 50%,#4E8A78 100%)}
+.hero.gifts{background:linear-gradient(135deg,#B04C72 0%,#D9AE5F 100%)}
 .hero .big{font-family:var(--display);font-weight:800;font-size:2.7rem;line-height:1}
 .hero p{margin:6px 0 0;opacity:.95}
 .hero .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
@@ -64,7 +64,7 @@ h1{font-size:2.05rem;font-weight:800;line-height:1.05}
 .journey .done{position:absolute;left:0;top:13.5px;height:6px;border-radius:6px;background:linear-gradient(90deg,var(--iris),var(--sky))}
 .journey .dot{position:absolute;top:10px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:var(--surface);border:3px solid var(--line)}
 .journey .dot.on{border-color:var(--iris);background:var(--iris)}
-.journey .flyer{position:absolute;top:2px;width:28px;height:28px;margin-left:-14px;border-radius:9px;overflow:hidden;box-shadow:0 0 0 3px var(--surface),0 4px 10px -3px rgba(23,64,127,.6);transition:left .8s cubic-bezier(.3,1.4,.5,1)}
+.journey .flyer{position:absolute;top:2px;width:28px;height:28px;margin-left:-14px;border-radius:9px;overflow:hidden;box-shadow:0 0 0 3px var(--surface),0 4px 10px -3px rgba(31,51,85,.55);transition:left .8s cubic-bezier(.3,1.4,.5,1)}
 .journey .flyer img{width:100%;height:100%;display:block}
 .journey .flyer.bad{box-shadow:0 0 0 3px var(--danger)}
 .journey.big{height:44px;margin:12px 10px 4px}
@@ -125,7 +125,7 @@ nav.tabs .in{display:flex;gap:6px;max-width:640px;width:100%;align-items:center}
 nav.tabs button.tab{flex:1;border:0;background:transparent;border-radius:16px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.78rem;font-weight:600;color:var(--muted)}
 nav.tabs button.tab svg{width:24px;height:24px}
 nav.tabs button.tab[aria-current="page"]{color:var(--iris);background:var(--iris-soft)}
-nav.tabs .add{width:58px;height:58px;border-radius:20px;border:0;background:linear-gradient(135deg,var(--nectar),var(--iris));color:#fff;display:grid;place-items:center;box-shadow:0 10px 24px -8px rgba(36,118,217,.6);margin:-26px 6px 0}
+nav.tabs .add{width:58px;height:58px;border-radius:20px;border:0;background:linear-gradient(135deg,var(--nectar),var(--iris));color:#fff;display:grid;place-items:center;box-shadow:0 10px 24px -8px rgba(46,74,120,.55);margin:-26px 6px 0}
 nav.tabs .add svg{width:28px;height:28px}
 /* ---- feuilles (détail, ajout) ---- */
 .scrim{position:fixed;inset:0;background:rgba(20,40,79,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center;animation:fade .2s ease}
@@ -184,7 +184,7 @@ nav.tabs .add svg{width:28px;height:28px}
 .gnum{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--iris);color:#fff;font-weight:800;font-family:var(--display)}
 .gstep.done .gnum{background:var(--emerald)}
 .demo{display:inline-block;font-family:var(--body);font-size:.7rem;font-weight:700;color:var(--muted);background:var(--bg);border-radius:999px;padding:1px 7px;vertical-align:2px}
-.demo.on{background:rgba(255,255,255,.28);color:#fff;margin-top:6px}
+.demo.on{background:rgba(255,255,255,.28);color:#fff;margin-left:4px}
 .tip{background:var(--surface);border-radius:var(--r-md);padding:16px;margin:-6px 0 22px;box-shadow:0 0 0 2px var(--iris-soft) inset}
 .tip p{margin:4px 0 12px;color:var(--muted);font-size:.92rem}
 .steps{margin:8px 0 12px;padding-left:20px;font-size:.9rem;color:var(--ink)}.steps li{margin:3px 0}.steps a{color:var(--iris);font-weight:600}
@@ -322,7 +322,7 @@ function statusLine(p){
 /* ---------- cartes cadeaux ---------- */
 var GTYPES=[['card','Carte cadeau','💳'],['voucher','Bon d\'achat','🎟️'],['box','Coffret','🎁'],['ecard','E-carte','📱'],['credit','Avoir','🧾']];
 var GT={};GTYPES.forEach(function(t){GT[t[0]]={n:t[1],e:t[2]}});
-var GRAD=[['#2476D9','#1A9A8E'],['#FF4F8B','#FFB21E'],['#0FB989','#22B8E6'],['#8F76FF','#FF4F8B'],['#FF7A45','#FF4F8B'],['#1D9BF0','#0FB989'],['#B44CF1','#6C4CF1'],['#FFB21E','#0FB989']];
+var GRAD=[['#2E4A78','#4E9682'],['#FF4F8B','#FFB21E'],['#0FB989','#22B8E6'],['#8F76FF','#FF4F8B'],['#FF7A45','#FF4F8B'],['#1D9BF0','#0FB989'],['#B44CF1','#6C4CF1'],['#FFB21E','#0FB989']];
 var BRANDS={fnac:['#F2A200','#E05A00'],decathlon:['#0082C3','#22B8E6'],smartbox:['#FF4F8B','#FF7A45'],wonderbox:['#E5484D','#FF4F8B'],amazon:['#232F3E','#FF9900'],sephora:['#1D1640','#6C4CF1'],ikea:['#0058A3','#1D9BF0'],zalando:['#FF6900','#FF4F8B'],cultura:['#6C2C91','#B44CF1'],darty:['#E30613','#FF7A45'],boulanger:['#F37021','#FFB21E'],leroymerlin:['#4F9A2A','#0FB989'],carrefour:['#0055A5','#22B8E6'],leclerc:['#0066B3','#0FB989'],nocibe:['#1D1640','#FF4F8B'],kiabi:['#003D7C','#22B8E6'],apple:['#1D1640','#6E6890'],netflix:['#B20710','#E50914'],spotify:['#1DB954','#0FB989'],tictactrip:['#6C4CF1','#FF4F8B'],illicado:['#E5007E','#FF4F8B'],cadhoc:['#E85D04','#FFB21E']};
 function gradOf(g){var k=String(g.brand||'').toLowerCase().normalize('NFD').replace(/[^a-z]/g,'');var p=BRANDS[k]||GRAD[hash((g.brand||'')+(g.type||''))%GRAD.length];return 'linear-gradient(135deg,'+p[0]+','+p[1]+')'}
 function bal(g){var b=num(g.balance);return b==null?num(g.amount):b}
@@ -339,7 +339,7 @@ function giftCard(g,i){
   var e=expTag(g),b=bal(g),a=num(g.amount),pct=a&&b!=null?Math.max(0,Math.min(100,b/a*100)):null;
   return '<button type="button" class="gcard'+(g.used||(e&&e.c==='gone')?' used':'')+'" style="background:'+gradOf(g)+'" data-gift="'+esc(g.id)+'">'+
     (e?'<span class="exp '+e.c+'">'+esc(e.t)+'</span>':'')+
-    '<div class="brand">'+esc(g.brand||g.title||'Sans nom')+'</div>'+(g.demo?'<span class="demo on">exemple</span>':'')+'<div class="kind">'+esc((GT[g.type]||GT.card).n)+(g.type==='box'&&g.title&&g.brand?' · '+esc(g.title):'')+'</div>'+
+    '<div class="brand">'+esc(g.brand||g.title||'Sans nom')+'</div><div class="kind">'+esc((GT[g.type]||GT.card).n)+(g.type==='box'&&g.title&&g.brand?' · '+esc(g.title):'')+(g.demo?' <span class="demo on">exemple</span>':'')+'</div>'+
     (g.type==='box'?'<span class="chipdeco"></span>':'')+
     '<div class="amt">'+(b!=null?'<b>'+esc(money(b))+'</b>'+(a&&b!==a?'<small>sur '+esc(money(a))+'</small>':'<small>'+(g.type==='box'?'valeur':'à dépenser')+'</small>'):'<b>'+esc(g.persons?g.persons+' pers.':'—')+'</b><small>'+(g.type==='box'?'coffret':'')+'</small>')+'</div>'+
     (pct!=null&&pct<100?'<span class="meter"><i style="width:'+pct+'%"></i></span>':'')+

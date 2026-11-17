@@ -173,6 +173,12 @@ nav.tabs .add svg{width:28px;height:28px}
 .upd p{margin:0 0 12px;color:#2E4D5A}
 .qr{background:#fff;border-radius:16px;padding:12px;width:180px;margin:6px auto 12px}
 .small{font-size:.85rem;color:var(--muted)}
+.demo{display:inline-block;font-family:var(--body);font-size:.7rem;font-weight:700;color:var(--muted);background:var(--bg);border-radius:999px;padding:1px 7px;vertical-align:2px}
+.demo.on{background:rgba(255,255,255,.28);color:#fff;margin-top:6px}
+.tip{background:var(--surface);border-radius:var(--r-md);padding:16px;margin:-6px 0 22px;box-shadow:0 0 0 2px var(--iris-soft) inset}
+.tip p{margin:4px 0 12px;color:var(--muted);font-size:.92rem}
+.steps{margin:8px 0 12px;padding-left:20px;font-size:.9rem;color:var(--ink)}.steps li{margin:3px 0}.steps a{color:var(--iris);font-weight:600}
+.okpill{display:inline-block;background:var(--emerald-soft);color:#0A7A5B;border-radius:999px;padding:1px 8px;font-size:.75rem;font-weight:700;vertical-align:1px}
 .cta-pill{display:inline-flex;gap:6px;align-items:center;background:var(--surface);border-radius:999px;padding:6px 12px;font-weight:600;font-size:.88rem;border:0;color:var(--iris)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -195,7 +201,7 @@ var KEY='kadokoli:v1';
 
 /* ---------- données ---------- */
 var D=load();
-function blank(){return {parcels:[],gifts:[],me:{name:'',notif:true,laposteKey:''},seen:0}}
+function blank(){return {parcels:[],gifts:[],me:{name:'',notif:true,laposteKey:'',t123Key:''},seen:0}}
 function load(){try{var d=JSON.parse(localStorage.getItem(KEY)||'null');if(d&&d.parcels)return Object.assign(blank(),d)}catch(e){}return blank()}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){toast('Mémoire pleine : supprime des photos de cartes.')}scheduleReminders();pushWidgets()}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
@@ -215,7 +221,7 @@ var fShort=new Intl.DateTimeFormat('fr-FR',{day:'numeric',month:'short',year:'nu
 var fDay=new Intl.DateTimeFormat('fr-FR',{day:'numeric',month:'long'});
 var fTime=new Intl.DateTimeFormat('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
 function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s}
-function toast(m){var t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove()},2600)}
+function toast(m){[].forEach.call(document.querySelectorAll('.toast'),function(x){x.remove()});var t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove()},2600)}
 function copy(t,label){
   var ok=function(){toast((label||'Copié')+' ✓')};
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,fb);else fb();
@@ -280,7 +286,10 @@ function detect(raw){
   else if(/^\d{16}$/.test(num))c='colisprive';
   return {num:num,carrier:c};
 }
-function trackUrl(p){var c=CARRIERS[p.carrier]||CARRIERS.other;return p.link||(c.url?c.url+encodeURIComponent(p.num):'')}
+function carrierOf(p){var c=CARRIERS[p.carrier];if(c&&p.carrier!=='other')return c;
+  return {n:p.carrierName||(p.carrier==='other'?'Autre':D.me.t123Key&&!p.updated?'Recherche…':'Transporteur ?'),c:'#5E6B86',url:''}}
+function trackUrl(p){var c=carrierOf(p);return p.link||p.trackLink||(c.url?c.url+encodeURIComponent(p.num):'')}
+function canAuto(p){return !p.demo&&!!(D.me.t123Key||(D.me.laposteKey&&CARRIERS[p.carrier]&&CARRIERS[p.carrier].lp))}
 
 /* ---------- statut d'un colis ---------- */
 var STEPS=[['ordered','Commandé'],['shipped','Expédié'],['transit','En chemin'],['near','Bientôt là'],['delivered','Livré']];
@@ -320,7 +329,7 @@ function giftCard(g,i){
   var e=expTag(g),b=bal(g),a=num(g.amount),pct=a&&b!=null?Math.max(0,Math.min(100,b/a*100)):null;
   return '<button type="button" class="gcard'+(g.used||(e&&e.c==='gone')?' used':'')+'" style="background:'+gradOf(g)+'" data-gift="'+esc(g.id)+'">'+
     (e?'<span class="exp '+e.c+'">'+esc(e.t)+'</span>':'')+
-    '<div class="brand">'+esc(g.brand||g.title||'Sans nom')+'</div><div class="kind">'+esc((GT[g.type]||GT.card).n)+(g.type==='box'&&g.title&&g.brand?' · '+esc(g.title):'')+'</div>'+
+    '<div class="brand">'+esc(g.brand||g.title||'Sans nom')+'</div>'+(g.demo?'<span class="demo on">exemple</span>':'')+'<div class="kind">'+esc((GT[g.type]||GT.card).n)+(g.type==='box'&&g.title&&g.brand?' · '+esc(g.title):'')+'</div>'+
     (g.type==='box'?'<span class="chipdeco"></span>':'')+
     '<div class="amt">'+(b!=null?'<b>'+esc(money(b))+'</b>'+(a&&b!==a?'<small>sur '+esc(money(a))+'</small>':'<small>'+(g.type==='box'?'valeur':'à dépenser')+'</small>'):'<b>'+esc(g.persons?g.persons+' pers.':'—')+'</b><small>'+(g.type==='box'?'coffret':'')+'</small>')+'</div>'+
     (pct!=null&&pct<100?'<span class="meter"><i style="width:'+pct+'%"></i></span>':'')+
@@ -349,6 +358,7 @@ function viewParcels(){
   if(!P.length)return h+'<div class="empty">'+logo('elogo')+'<h3>Aucun colis en route</h3><p>Colle un numéro de suivi : Kadokoli reconnaît le transporteur et te dit où en est ton colis.</p><button type="button" class="btn" data-add>'+IC.plus+'Ajouter un colis</button></div>';
   h+='<div class="hero parcels"><div class="big">'+act.length+'</div><p>'+(act.length>1?'colis en route':act.length?'colis en route':'Tout est arrivé 🎉')+'</p><div class="pills">'+
     (todayP.length?'<span class="pill">🚚 '+todayP.length+' aujourd\'hui</span>':'')+(relay.length?'<span class="pill">📍 '+relay.length+' à retirer</span>':'')+(dlv.length?'<span class="pill">✓ '+dlv.length+' livré'+(dlv.length>1?'s':'')+'</span>':'')+'</div></div>';
+  if(!D.me.t123Key&&!D.me.hideTip)h+='<div class="tip"><div><b>Juste le numéro, et c\'est tout</b><p>Active le suivi automatique : Kadokoli trouve le transporteur et le statut de chaque colis.</p><div class="btnrow"><button type="button" class="btn" data-tab="me">Activer (2 min)</button><button type="button" class="btn ghost" data-hidetip>Plus tard</button></div></div></div>';
   if(relay.length)h+=group('À retirer en point relais',relay);
   var rest=act.filter(function(p){return relay.indexOf(p)<0});
   if(rest.length)h+=group('En route',rest);
@@ -357,9 +367,9 @@ function viewParcels(){
 }
 function group(t,L){return '<div class="sec"><div class="sech"><h2>'+t+'</h2><span>'+L.length+'</span></div><div class="list">'+L.map(pcard).join('')+'</div></div>'}
 function pcard(p){
-  var c=CARRIERS[p.carrier]||CARRIERS.other;
+  var c=carrierOf(p);
   return '<button type="button" class="pcard'+(p.status==='delivered'?' delivered':p.status==='relay'?' relay':'')+'" data-parcel="'+esc(p.id)+'">'+
-    '<div class="row1"><span class="pname">'+esc(p.name||'Colis '+p.num)+'</span><span class="carrier" style="color:'+c.c+';background:'+c.c+'1A"><i></i>'+esc(c.n)+'</span></div>'+
+    '<div class="row1"><span class="pname">'+esc(p.name||'Colis '+p.num)+(p.demo?' <span class="demo">exemple</span>':'')+'</span><span class="carrier" style="color:'+c.c+';background:'+c.c+'1A"><i></i>'+esc(c.n)+'</span></div>'+
     '<div class="pstat">'+statusLine(p)+(p.shop?' · <span>'+esc(p.shop)+'</span>':'')+'</div>'+journey(p)+'</button>';
 }
 function viewGifts(){
@@ -384,7 +394,11 @@ function viewMe(){
       :'<button type="button" class="btn soft full" data-checkupd>'+IC.refresh+(u&&u.loading?'Recherche…':'Rechercher une mise à jour')+'</button>')+'</div>';
   h+='<div class="card"><label class="field" style="margin:0"><span>Ton prénom</span><input id="f-name" value="'+esc(D.me.name)+'" placeholder="Pour te dire bonjour" autocomplete="given-name"></label></div>';
   h+='<div class="card"><div class="setrow"><div><b>Rappels</b><p>Une notification 30 jours, 7 jours et la veille de l\'expiration d\'un cadeau, et avant la date limite de retrait d\'un colis.</p></div><input type="checkbox" class="switch" data-notif'+(D.me.notif?' checked':'')+' aria-label="Rappels"></div>'+
-    '<div class="setrow"><div style="flex:1"><b>Suivi automatique La Poste</b><p>Colissimo, La Poste et Chronopost se mettent à jour tout seuls avec une clé gratuite du site développeur de La Poste (« Suivi v2 »). Les autres transporteurs s\'ouvrent sur leur site.</p><label class="field" style="margin:10px 0 0"><input id="f-lpkey" value="'+esc(D.me.laposteKey)+'" placeholder="Clé « X-Okapi-Key »" autocapitalize="off" spellcheck="false"></label></div></div></div>';
+    '<div class="setrow"><div style="flex:1;min-width:0"><b>Suivi automatique des colis</b>'+(D.me.t123Key?' <span class="okpill">activé</span>':'')+'<p>Avec une clé Track123 gratuite, le numéro suffit : Kadokoli trouve le transporteur (Colissimo, Mondial Relay, Vinted Go, UPS, DHL, Amazon… plus de 1 500) et met le statut à jour tout seul.</p>'+
+      '<ol class="steps"><li>Crée un compte gratuit sur <a href="https://www.track123.com" target="_blank" rel="noopener">track123.com</a>.</li><li>Va dans <b>Developers › API</b> et copie ta clé.</li><li>Colle-la ici.</li></ol>'+
+      '<div class="two" style="grid-template-columns:1fr auto;align-items:end"><label class="field" style="margin:0"><input id="f-t123" value="'+esc(D.me.t123Key||'')+'" placeholder="Clé API Track123" autocapitalize="off" spellcheck="false" autocomplete="off"></label><button type="button" class="btn soft" data-testkey>Tester</button></div>'+
+      '<p class="small" style="margin-top:8px">Le forfait gratuit couvre une cinquantaine de nouveaux colis par mois. Les mises à jour d\'un colis déjà suivi ne comptent pas.</p>'+
+      '<details style="margin-top:6px"><summary class="small" style="cursor:pointer">Option : clé La Poste</summary><p class="small">Avec une clé gratuite « Suivi v2 » du site développeur de La Poste, Colissimo, La Poste et Chronopost passent par La Poste et ne comptent pas dans le quota Track123.</p><label class="field" style="margin:6px 0 0"><input id="f-lpkey" value="'+esc(D.me.laposteKey)+'" placeholder="Clé « X-Okapi-Key »" autocapitalize="off" spellcheck="false"></label></details></div></div></div>';
   h+='<div class="card"><b>Partager Kadokoli</b><p class="small" style="margin:4px 0 10px">Envoie l\'appli à tes proches : sur Android, le lien télécharge l\'appli.</p><div class="qr" id="qr"></div><div class="btnrow"><button type="button" class="btn" data-shareapp>'+IC.share+'Partager l\'appli</button><button type="button" class="btn soft" data-copy="'+esc(APK_URL)+'">'+IC.copy+'Copier le lien</button></div></div>';
   h+='<div class="card"><b>Sauvegarde</b><p class="small" style="margin:4px 0 10px">Tes données restent sur ce téléphone. Exporte-les pour les garder ou les passer sur un autre appareil.</p><div class="btnrow"><button type="button" class="btn soft" data-export>'+IC.down+'Exporter</button><label class="btn soft">'+IC.share+'Importer<input type="file" id="f-import" accept=".json,application/json" hidden></label></div></div>';
   h+='<p class="small" style="text-align:center">Kadokoli '+(APP_BUILD?'1.'+APP_BUILD:'(aperçu)')+' · fait maison avec soin</p>';
@@ -402,13 +416,13 @@ function openSheet(html){
 }
 function closeSheet(silent){var l=$('#layer');if(l.firstChild){l.innerHTML='';document.body.style.overflow=''}S.sheet=null;if(!silent)render()}
 function sheetParcel(p){
-  S.sheet={k:'parcel',id:p.id};var c=CARRIERS[p.carrier]||CARRIERS.other,u=trackUrl(p),ev=p.events||[];
+  S.sheet={k:'parcel',id:p.id};var c=carrierOf(p),u=trackUrl(p),ev=p.events||[];
   var h='<h2>'+esc(p.name||'Colis')+'</h2><p class="sub">'+esc([p.shop,c.n].filter(Boolean).join(' · '))+'</p>';
   h+='<div class="card"><div class="jlabels">'+STEPS.map(function(s,i){return '<span'+(i===stepOf(p)?' class="on"':'')+'>'+s[1]+'</span>'}).join('')+'</div>'+journey(p,true)+
     '<p style="margin:12px 0 0">'+statusLine(p)+'</p>'+(p.updated?'<p class="small" style="margin:4px 0 0">Mis à jour '+esc(fTime.format(new Date(p.updated)))+'</p>':'')+'</div>';
   if(p.status==='relay')h+='<div class="relaybox">📍 <b>'+esc(p.relay||'Point relais')+'</b>'+(p.pickupCode?'<br>Code de retrait : <span class="code">'+esc(p.pickupCode)+'</span>':'')+(p.pickupBy?'<br>À retirer avant le '+esc(fShort.format(pdate(p.pickupBy))):'')+'</div>';
   h+='<div class="codebox"><div><div class="small">Numéro de suivi</div><div class="code">'+esc(p.num||'—')+'</div></div><button type="button" class="btn ghost" data-copy="'+esc(p.num)+'" aria-label="Copier le numéro">'+IC.copy+'</button></div>';
-  h+='<div class="btnrow" style="margin-bottom:12px">'+(u?'<a class="btn" href="'+esc(u)+'" target="_blank" rel="noopener">'+IC.link+'Suivre sur le site</a>':'')+(CARRIERS[p.carrier]&&CARRIERS[p.carrier].lp?'<button type="button" class="btn soft" data-refresh="'+esc(p.id)+'">'+IC.refresh+'Actualiser</button>':'')+'</div>';
+  h+='<div class="btnrow" style="margin-bottom:12px">'+(u?'<a class="btn" href="'+esc(u)+'" target="_blank" rel="noopener">'+IC.link+'Suivre sur le site</a>':'')+(canAuto(p)?'<button type="button" class="btn soft" data-refresh="'+esc(p.id)+'">'+IC.refresh+'Actualiser</button>':'')+'</div>';
   h+='<div class="card"><b>Où en est-il ?</b><p class="small" style="margin:2px 0 10px">Mets à jour toi-même si le transporteur ne le fait pas.</p><div class="seg">'+
     [['shipped','📦','Expédié'],['transit','🛫','En chemin'],['out','🚚','En livraison'],['relay','📍','En point relais'],['delivered','✅','Livré'],['issue','⚠️','Problème']].map(function(o){return '<button type="button" data-setstatus="'+o[0]+'" aria-pressed="'+(p.status===o[0])+'"><span>'+o[1]+'</span>'+o[2]+'</button>'}).join('')+'</div></div>';
   if(ev.length)h+='<div class="card"><b>Historique</b><ul class="timeline" style="margin-top:10px">'+ev.slice(0,15).map(function(e){return '<li><b>'+esc(e.label)+'</b><small>'+esc(e.date?fTime.format(new Date(e.date)):'')+(e.place?' · '+esc(e.place):'')+'</small></li>'}).join('')+'</ul></div>';
@@ -441,7 +455,7 @@ function formParcel(p){
   p=p||{};S.sheet={k:'fparcel',id:p.id||null,carrier:p.carrier||''};
   var h='<h2>'+(p.id?'Modifier le colis':'Nouveau colis')+'</h2><p class="sub">Colle le numéro de suivi ou le lien reçu par mail : Kadokoli reconnaît le transporteur.</p><form id="fp">';
   h+='<label class="field"><span>Numéro de suivi ou lien</span><input id="p-num" value="'+esc(p.num||'')+'" placeholder="ex. 6A12345678901" autocapitalize="characters" spellcheck="false" autocomplete="off" required'+(p.id?'':' autofocus')+'></label><div id="p-det"></div>';
-  h+='<label class="field"><span>Transporteur</span><select id="p-car">'+Object.keys(CARRIERS).map(function(k){return '<option value="'+k+'"'+((p.carrier||'')===k?' selected':'')+'>'+CARRIERS[k].n+'</option>'}).join('')+'</select></label>';
+  h+='<label class="field"><span>Transporteur</span><select id="p-car"><option value="">'+(D.me.t123Key?'Détection automatique':'Je ne sais pas')+'</option>'+Object.keys(CARRIERS).map(function(k){return '<option value="'+k+'"'+((p.carrier||'')===k?' selected':'')+'>'+CARRIERS[k].n+'</option>'}).join('')+'</select></label>';
   h+='<label class="field"><span>C\'est quoi ?</span><input id="p-name" value="'+esc(p.name||'')+'" placeholder="ex. Baskets running, cadeau de Léa…"></label>';
   h+='<div class="two"><label class="field"><span>Boutique</span><input id="p-shop" value="'+esc(p.shop||'')+'" placeholder="ex. Vinted"></label><label class="field"><span>Livraison prévue</span><input id="p-eta" type="date" value="'+esc(p.eta||'')+'"></label></div>';
   h+='<details'+(p.relay||p.pickupCode?' open':'')+'><summary class="small" style="margin:0 0 10px 4px;cursor:pointer">Point relais (facultatif)</summary><label class="field"><span>Point relais</span><input id="p-relay" value="'+esc(p.relay||'')+'" placeholder="ex. Tabac de la Gare, 3 rue…"></label><div class="two"><label class="field"><span>Code de retrait</span><input id="p-code" value="'+esc(p.pickupCode||'')+'"></label><label class="field"><span>À retirer avant</span><input id="p-by" type="date" value="'+esc(p.pickupBy||'')+'"></label></div></details>';
@@ -452,7 +466,7 @@ function formParcel(p){
 function detectUi(){
   var i=$('#p-num');if(!i)return;var r=detect(i.value),el=$('#p-det');
   if(r.carrier&&!S.sheet.carrierLocked){$('#p-car').value=r.carrier}
-  el.innerHTML=r.carrier?'<div class="detected">✓ '+esc(CARRIERS[r.carrier].n)+' reconnu'+(r.num&&r.num!==i.value.trim().toUpperCase()?' · n° '+esc(r.num):'')+'</div>':(i.value.trim().length>5?'<p class="small" style="margin:-6px 4px 12px">Transporteur non reconnu : choisis-le dans la liste.</p>':'');
+  el.innerHTML=r.carrier?'<div class="detected">✓ '+esc(CARRIERS[r.carrier].n)+' reconnu'+(r.num&&r.num!==i.value.trim().toUpperCase()?' · n° '+esc(r.num):'')+'</div>':(i.value.trim().length>5?'<p class="small" style="margin:-6px 4px 12px">'+(D.me.t123Key?'Kadokoli va chercher le transporteur en ligne.':'Transporteur non reconnu : choisis-le, ou active le suivi automatique dans Mon compte.')+'</p>':'');
 }
 function formGift(g){
   g=g||{type:'card'};S.sheet={k:'fgift',id:g.id||null,type:g.type||'card',photo:g.photo||''};
@@ -478,8 +492,13 @@ function chooseAdd(){
 
 /* ---------- suivi automatique La Poste (Colissimo, La Poste, Chronopost) ---------- */
 function lpMap(code){code=String(code||'');if(/^DI/.test(code))return 'delivered';if(/^(AG|RE1)/.test(code))return 'relay';if(/^MD/.test(code))return 'out';if(/^(ND|RE|RS)/.test(code))return 'issue';if(/^(ET|PB|DO|EP)/.test(code))return 'transit';if(/^PC/.test(code))return 'shipped';return ''}
-function refreshParcel(p,quiet){
-  var key=D.me.laposteKey;if(!key||!CARRIERS[p.carrier]||!CARRIERS[p.carrier].lp)return Promise.resolve(false);
+function refreshParcel(p,quiet,force){
+  if(D.me.laposteKey&&CARRIERS[p.carrier]&&CARRIERS[p.carrier].lp)return lpRefresh(p,quiet||!!D.me.t123Key).then(function(ok){return ok||!D.me.t123Key?ok:t123Refresh(p,quiet,force)});
+  if(D.me.t123Key)return t123Refresh(p,quiet,force);
+  return Promise.resolve(false);
+}
+function lpRefresh(p,quiet){
+  var key=D.me.laposteKey;
   return fetch('https://api.laposte.fr/suivi/v2/idships/'+encodeURIComponent(p.num)+'?lang=fr_FR',{headers:{'X-Okapi-Key':key,'Accept':'application/json'}}).then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j}})}).then(function(x){
     var sh=x.j&&x.j.shipment;
     if(!x.ok||!sh){if(!quiet)toast(x.j&&x.j.returnMessage?x.j.returnMessage:'Numéro inconnu chez La Poste pour l\'instant.');return false}
@@ -491,9 +510,47 @@ function refreshParcel(p,quiet){
     p.updated=Date.now();save();return true;
   }).catch(function(){if(!quiet)toast('Pas de réponse de La Poste : vérifie ta connexion et ta clé.');return false});
 }
+/* ---------- suivi automatique Track123 : le numéro suffit, le transporteur est détecté ---------- */
+var T123='https://api.track123.com/gateway/open-api/tk/';
+function t123(path,body){
+  return fetch(T123+path,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','Track123-Api-Secret':D.me.t123Key},body:JSON.stringify(body)})
+    .then(function(r){return r.json().catch(function(){throw new Error('Track123 ne répond pas correctement ('+r.status+').')})});
+}
+function t123Msg(j){var m=j&&(j.msg||j.message)||'';if(/secret|key|auth|token|签名|密钥/i.test(m)||/^A0(1|2)/.test(j&&j.code||''))return 'Clé Track123 refusée : vérifie-la dans Mon compte.';if(/quota|额度|余额/i.test(m))return 'Quota Track123 du mois épuisé : choisis le transporteur à la main en attendant.';return m&&!/[\u4e00-\u9fff]/.test(m)?'Track123 : '+m:'Track123 ne trouve pas ce numéro pour l\'instant.'}
+function t123Leg(c){var lm=c&&c.lastMileInfo&&c.lastMileInfo.openApiWayBillInfo;return lm&&lm.trackingDetails&&lm.trackingDetails.length?lm:(c&&c.localLogisticsInfo)||{}}
+function t123Carrier(code,name){var x=(' '+(code||'')+' '+(name||'')+' ').toLowerCase();
+  var R=[[/colissimo/,'colissimo'],[/chronopost/,'chronopost'],[/mondial|inpost/,'mondialrelay'],[/relais.?colis/,'relaiscolis'],[/colis.?priv/,'colisprive'],[/la.?poste|france.?post/,'laposte'],[/\bdpd/,'dpd'],[/\bgls/,'gls'],[/\bups\b/,'ups'],[/\bdhl/,'dhl'],[/fedex|\btnt\b/,'fedex'],[/amazon/,'amazon'],[/vinted/,'vinted']];
+  for(var i=0;i<R.length;i++)if(R[i][0].test(x))return R[i][1];return 'other'}
+function t123Status(st,last){
+  switch(String(st||'')){case 'INFO_RECEIVED':return 'shipped';case 'IN_TRANSIT':return 'transit';
+    case 'WAITING_DELIVERY':return /relais|retrait|retirer|disponible|consigne|locker|pick.?up|collect|point/i.test(last||'')?'relay':'out';
+    case 'DELIVERY_FAILED':case 'ABNORMAL':return 'issue';case 'DELIVERED':return 'delivered'}return ''}
+function t123Date(d){if(d.eventTimeZeroUTC)return d.eventTimeZeroUTC;var t=String(d.eventTime||'');return t?t.replace(' ','T'):''}
+function t123Apply(p,c){
+  var leg=t123Leg(c);
+  if(leg.courierCode){if(!p.carrierLocked)p.carrier=t123Carrier(leg.courierCode,leg.courierNameEN);p.carrierName=leg.courierNameEN||leg.courierCode;p.trackLink=leg.courierTrackingLink||p.trackLink||''}
+  var ev=(leg.trackingDetails||[]).map(function(d){return {label:d.eventDetail||'',date:t123Date(d),place:d.address||''}}).filter(function(e){return e.label});
+  if(ev.length)p.events=ev;
+  var st=t123Status(c.transitStatus,ev[0]&&ev[0].label);if(st)p.status=st;
+  if(p.status==='relay'&&!p.relay&&ev[0]&&ev[0].place)p.relay=ev[0].place;
+  if(c.expectedDelivery&&p.status!=='delivered')p.eta=String(c.expectedDelivery).slice(0,10);
+  p.t123=1;p.updated=Date.now();
+}
+function t123Refresh(p,quiet,force){
+  var first=p.t123?Promise.resolve():t123('v2/track/import',[{trackNo:p.num,courierCode:p.carrierLocked&&p.t123Code||undefined}]).then(function(j){if(j.code!=='00000')throw new Error(t123Msg(j))});
+  return first.then(function(){return t123('v2.1/track/query',{trackNoInfos:[{trackNo:p.num}],queryPageSize:1})}).then(function(j){
+    if(j.code!=='00000')throw new Error(t123Msg(j));
+    var c=j.data&&j.data.accepted&&(j.data.accepted.content||[])[0];
+    if(!c){var rj=(j.data&&j.data.rejected||[])[0];throw new Error(rj?t123Msg(rj.error||rj):'Track123 ne trouve pas ce numéro pour l\'instant.')}
+    /* pas encore d'étape : on interroge le transporteur en direct (1 crédit), au plus une fois par jour et seulement sur demande */
+    if(force&&!(t123Leg(c).trackingDetails||[]).length&&(!p.rtAt||Date.now()-p.rtAt>864e5)){p.rtAt=Date.now();
+      return t123('v2.1/track/query-realtime',{trackNo:p.num,courierCode:t123Leg(c).courierCode||undefined}).then(function(j2){var a=j2&&j2.data&&j2.data.accepted;var c2=Array.isArray(a)?a[0]:a&&a.content?a.content[0]:a;return c2&&(t123Leg(c2).trackingDetails||[]).length?c2:c},function(){return c})}
+    return c;
+  }).then(function(c){t123Apply(p,c);save();return true}).catch(function(e){if(!quiet)toast(e&&e.message&&!/fetch|network/i.test(e.message)?e.message:'Pas de réponse de Track123 : vérifie ta connexion.');return false});
+}
 function refreshAll(){
-  var L=D.parcels.filter(function(p){return p.status!=='delivered'&&CARRIERS[p.carrier]&&CARRIERS[p.carrier].lp&&(!p.updated||Date.now()-p.updated>20*60e3)});
-  if(!L.length||!D.me.laposteKey)return;
+  var L=D.parcels.filter(function(p){return p.status!=='delivered'&&canAuto(p)&&(!p.updated||Date.now()-p.updated>20*60e3)});
+  if(!L.length)return;
   L.reduce(function(pr,p){return pr.then(function(){return refreshParcel(p,true)})},Promise.resolve()).then(function(){if(!S.sheet)render()});
 }
 
@@ -563,7 +620,7 @@ document.addEventListener('click',function(e){
   if(t.hasAttribute('data-toggledel')){S.showDelivered=!S.showDelivered;render();return}
   if(d.copy!=null&&d.copy!==''){copy(d.copy);return}
   if(d.setstatus){var p2=find('parcels',S.sheet.id);p2.status=d.setstatus;p2.updated=Date.now();if(!p2.events)p2.events=[];p2.events.unshift({label:STATUS[d.setstatus].t+' (mis à jour par toi)',date:new Date().toISOString()});save();sheetParcel(p2);if(d.setstatus==='delivered')toast('Livré 🎉');return}
-  if(d.refresh){var p3=find('parcels',d.refresh);t.disabled=true;refreshParcel(p3,false).then(function(ok){if(ok){toast('Suivi mis à jour');sheetParcel(p3)}else t.disabled=false});return}
+  if(d.refresh){var p3=find('parcels',d.refresh);t.disabled=true;refreshParcel(p3,false,true).then(function(ok){if(ok){toast('Suivi mis à jour');sheetParcel(p3)}else t.disabled=false});return}
   if(d.editparcel){formParcel(find('parcels',d.editparcel));return}
   if(d.editgift){formGift(find('gifts',d.editgift));return}
   if(d.del){var k=d.del.split(':');if(!t.hasAttribute('data-sure')){t.setAttribute('data-sure','1');t.textContent='Confirmer la suppression';return}
@@ -574,9 +631,12 @@ document.addEventListener('click',function(e){
   if(d.use){var g3=find('gifts',d.use);g3.used=true;save();closeSheet();toast('Bien profité ! 🎉');return}
   if(d.unuse){var g4=find('gifts',d.unuse);g4.used=false;save();sheetGift(g4);return}
   if(t.hasAttribute('data-showpin')){var pe=$('[data-pin]');pe.textContent=pe.textContent.indexOf('•')===0?pe.getAttribute('data-pin'):'••••';t.textContent=pe.textContent.indexOf('•')===0?'Afficher':'Masquer';return}
-  if(d.shareparcel){var p4=find('parcels',d.shareparcel),c=CARRIERS[p4.carrier]||CARRIERS.other;share(p4.name||'Colis','📦 '+(p4.name||'Colis')+(p4.shop?' ('+p4.shop+')':'')+'\n'+(STATUS[p4.status]||STATUS.ordered).t+(p4.eta?' · prévu le '+fShort.format(pdate(p4.eta)):'')+'\n'+c.n+' n° '+p4.num,trackUrl(p4));return}
+  if(d.shareparcel){var p4=find('parcels',d.shareparcel),c=carrierOf(p4);share(p4.name||'Colis','📦 '+(p4.name||'Colis')+(p4.shop?' ('+p4.shop+')':'')+'\n'+(STATUS[p4.status]||STATUS.ordered).t+(p4.eta?' · prévu le '+fShort.format(pdate(p4.eta)):'')+'\n'+c.n+' n° '+p4.num,trackUrl(p4));return}
   if(d.sharegift){var g5=find('gifts',d.sharegift);share(g5.brand||'Cadeau','🎁 '+(GT[g5.type]||GT.card).n+' '+(g5.brand||'')+(g5.title?' – '+g5.title:'')+(bal(g5)!=null?'\nSolde : '+money(bal(g5)):'')+(g5.expiry?'\nValable jusqu\'au '+fShort.format(pdate(g5.expiry)):'')+(g5.code?'\nCode : '+g5.code:'')+(g5.pin?'\nPIN : '+g5.pin:''));return}
   if(t.hasAttribute('data-shareapp')){share('Kadokoli','Je suis mes colis et mes cartes cadeaux avec Kadokoli. Télécharge l\'appli (Android) :',APK_URL);return}
+  if(t.hasAttribute('data-testkey')){if(!D.me.t123Key){toast('Colle d\'abord ta clé Track123.');return}t.disabled=true;t.textContent='…';
+    t123('v2.1/track/query',{trackNoInfos:[{trackNo:'KADOKOLITEST'}],queryPageSize:1}).then(function(j){toast(j.code==='00000'?'Clé valide ✓ Le suivi automatique est activé.':t123Msg(j));if(j.code==='00000'){render();refreshAll()}},function(){toast('Pas de réponse de Track123 : vérifie ta connexion.')}).then(function(){t.disabled=false;t.textContent='Tester'});return}
+  if(t.hasAttribute('data-hidetip')){D.me.hideTip=1;save();render();return}
   if(t.hasAttribute('data-checkupd')){checkUpdate(true);return}
   if(t.hasAttribute('data-download')){toast('Téléchargement lancé… ouvre ensuite le fichier pour installer.');if(NATIVE)location.href=APK_URL;else window.open(APK_URL,'_blank');return}
   if(t.hasAttribute('data-export')){var fname='kadokoli-sauvegarde-'+ymd(new Date())+'.json',json=JSON.stringify(D,null,1);
@@ -587,6 +647,7 @@ document.addEventListener('input',function(e){
   if(e.target.id==='p-num')detectUi();
   if(e.target.id==='f-name'){D.me.name=e.target.value.trim();save()}
   if(e.target.id==='f-lpkey'){D.me.laposteKey=e.target.value.trim();save()}
+  if(e.target.id==='f-t123'){D.me.t123Key=e.target.value.trim();save()}
 });
 document.addEventListener('change',function(e){
   var t=e.target;
@@ -601,11 +662,14 @@ document.addEventListener('submit',function(e){
   if(f.id==='fp'){
     var r=detect(v('p-num'));if(!r.num){toast('Indique le numéro de suivi.');return}
     var raw=v('p-num'),o=S.sheet.id?find('parcels',S.sheet.id):{id:uid(),at:Date.now(),status:'ordered',events:[]};
-    o.num=r.num;o.link=/^https?:/i.test(raw)?raw:'';o.carrier=v('p-car')||r.carrier||'other';o.name=v('p-name');o.shop=v('p-shop');o.eta=v('p-eta');o.relay=v('p-relay');o.pickupCode=v('p-code');o.pickupBy=v('p-by');o.notes=v('p-notes');
+    o.num=r.num;o.link=/^https?:/i.test(raw)?raw:'';o.carrierLocked=!!(S.sheet.carrierLocked&&v('p-car'));o.carrier=v('p-car')||r.carrier||'';o.name=v('p-name');o.shop=v('p-shop');o.eta=v('p-eta');o.relay=v('p-relay');o.pickupCode=v('p-code');o.pickupBy=v('p-by');o.notes=v('p-notes');
     if(o.relay&&o.status==='ordered')o.status='relay';
-    if(!S.sheet.id)D.parcels.push(o);save();closeSheet(true);S.tab='parcels';render();sheetParcel(o);
-    refreshParcel(o,true).then(function(ok){if(ok&&S.sheet&&S.sheet.id===o.id)sheetParcel(o)});
-    toast(S.sheet&&S.sheet.id===o.id?'Colis suivi ✓':'Enregistré');return;
+    if(!S.sheet.id){D.parcels=D.parcels.filter(function(x){return !x.demo});D.parcels.push(o)}save();closeSheet(true);S.tab='parcels';render();sheetParcel(o);
+    var again=function(){if(S.sheet&&S.sheet.k==='parcel'&&S.sheet.id===o.id)sheetParcel(o);else if(!S.sheet)render()};
+    if(canAuto(o)){toast('Recherche du suivi…');refreshParcel(o,false).then(function(ok){again();
+      /* un colis tout juste enregistré peut mettre quelques secondes à remonter chez Track123 */
+      if(ok&&o.t123&&!o.events.length)[8e3,25e3].forEach(function(ms){setTimeout(function(){if(!o.events.length)refreshParcel(o,true).then(again)},ms)})})}
+    else toast('Colis enregistré ✓');return;
   }
   if(f.id==='fg'){
     if(!v('g-brand')){toast('Indique l\'enseigne.');return}
@@ -613,7 +677,7 @@ document.addEventListener('submit',function(e){
     g.type=S.sheet.type;g.brand=v('g-brand');g.title=g.type==='box'?v('g-title'):'';g.amount=num(v('g-amount'));g.expiry=v('g-expiry');g.code=v('g-code');g.pin=v('g-pin');
     g.persons=g.type==='box'?(+v('g-persons')||null):null;g.from=v('g-from');g.where=v('g-where');g.notes=v('g-notes');if(S.sheet.photo)g.photo=S.sheet.photo;
     if($('#g-balance'))g.balance=num(v('g-balance'));
-    var isNew=!S.sheet.id;if(isNew)D.gifts.push(g);save();if(isNew&&D.me.notif)askNotif();closeSheet(true);S.tab='gifts';render();sheetGift(g);toast(isNew?'Cadeau ajouté ✓':'Enregistré');
+    var isNew=!S.sheet.id;if(isNew){D.gifts=D.gifts.filter(function(x){return !x.demo});D.gifts.push(g)}save();if(isNew&&D.me.notif)askNotif();closeSheet(true);S.tab='gifts';render();sheetGift(g);toast(isNew?'Cadeau ajouté ✓':'Enregistré');
   }
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&$('#layer').firstChild)closeSheet()});

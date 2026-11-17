@@ -83,6 +83,11 @@ h1{font-size:2.05rem;font-weight:800;line-height:1.05}
 .pcard.delivered{opacity:.75}
 .pcard.relay{box-shadow:0 0 0 2px var(--pollen) inset}
 .code{font-family:var(--display);font-weight:700;letter-spacing:.06em}
+.place{display:flex;gap:12px;background:var(--surface);border-radius:var(--r-md);padding:14px 16px;margin-bottom:12px}
+.place.relay{background:var(--pollen-soft)}
+.place .pic{font-size:1.5rem;line-height:1}.place .ptxt{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+.place .ptxt b{font-size:1.02rem;overflow-wrap:anywhere}.place .btn{margin-top:8px;padding:9px 14px}.place .btn.ghost{padding:6px 0}
+.prelay{display:block;margin-top:2px;color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .relaybox{background:var(--pollen-soft);border-radius:var(--r-sm);padding:10px 12px;margin-top:10px;font-size:.92rem}
 /* ---- cadeaux : de vraies cartes ---- */
 .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;margin:0 -2px;scrollbar-width:none}
@@ -383,7 +388,7 @@ function pcard(p){
   var c=carrierOf(p);
   return '<button type="button" class="pcard'+(p.status==='delivered'?' delivered':p.status==='relay'?' relay':'')+'" data-parcel="'+esc(p.id)+'">'+
     '<div class="row1"><span class="pname">'+esc(p.name||'Colis '+p.num)+(p.demo?' <span class="demo">exemple</span>':'')+'</span><span class="carrier" style="color:'+c.c+';background:'+c.c+'1A"><i></i>'+esc(c.n)+'</span></div>'+
-    '<div class="pstat">'+statusLine(p)+(p.shop?' · <span>'+esc(p.shop)+'</span>':'')+'</div>'+journey(p)+'</button>';
+    '<div class="pstat">'+statusLine(p)+(p.shop?' · <span>'+esc(p.shop)+'</span>':'')+(p.status==='relay'&&p.relay?'<span class="prelay">📍 '+esc(p.relay)+'</span>':'')+'</div>'+journey(p)+'</button>';
 }
 function viewGifts(){
   var G=D.gifts.slice().sort(function(a,b){var x=a.used?1:0,y=b.used?1:0;if(x!==y)return x-y;return (a.expiry||'9999').localeCompare(b.expiry||'9999')});
@@ -405,7 +410,8 @@ function viewMe(){
     (u&&u.newer?esc(u.notes||'Des améliorations t\'attendent.'):u&&u.checked?'Tu as la dernière version'+(APP_BUILD?' (1.'+APP_BUILD+')':'')+'.':'Version installée : '+(APP_BUILD?'1.'+APP_BUILD:'aperçu')+'.')+'</p>'+
     (u&&u.newer?'<button type="button" class="btn green full" data-download>'+IC.down+'Télécharger la mise à jour</button><p class="small" style="margin:10px 0 0">Ouvre ensuite le fichier téléchargé pour l\'installer : tes colis et cadeaux sont conservés.</p>'
       :'<button type="button" class="btn soft full" data-checkupd>'+IC.refresh+(u&&u.loading?'Recherche…':'Rechercher une mise à jour')+'</button>')+'</div>';
-  h+='<div class="card"><label class="field" style="margin:0"><span>Ton prénom</span><input id="f-name" value="'+esc(D.me.name)+'" placeholder="Pour te dire bonjour" autocomplete="given-name"></label></div>';
+  h+='<div class="card"><label class="field" style="margin:0"><span>Ton prénom</span><input id="f-name" value="'+esc(D.me.name)+'" placeholder="Pour te dire bonjour" autocomplete="given-name"></label>'+
+    '<label class="field" style="margin:12px 0 0"><span>Ton adresse de livraison</span><input id="f-addr" value="'+esc(D.me.address||'')+'" placeholder="ex. 12 rue des Lilas, 69003 Lyon" autocomplete="street-address"><span class="hint">Affichée sur tes colis livrés à domicile, avec un lien vers la carte.</span></label></div>';
   h+='<div class="card"><div class="setrow"><div><b>Rappels</b><p>Une notification 30 jours, 7 jours et la veille de l\'expiration d\'un cadeau, et avant la date limite de retrait d\'un colis.</p></div><input type="checkbox" class="switch" data-notif'+(D.me.notif?' checked':'')+' aria-label="Rappels"></div>'+
     '<div class="setrow"><div style="flex:1;min-width:0"><b>Suivi automatique des colis</b>'+(D.me.t123Key?' <span class="okpill">activé</span>':'')+'<p>Avec une clé Track123 gratuite, le numéro suffit : Kadokoli trouve le transporteur (Colissimo, Mondial Relay, Vinted Go, UPS, DHL, Amazon… plus de 1 500) et met le statut à jour tout seul.</p>'+
       (D.me.t123Key?'':'<button type="button" class="btn full" style="margin:10px 0 12px" data-setup>Activer en 3 étapes</button><p class="small" style="margin:0 0 6px">Ou colle directement ta clé :</p>')+
@@ -428,12 +434,23 @@ function openSheet(html){
   var f=l.querySelector('[autofocus]');if(f)setTimeout(function(){f.focus()},250);
 }
 function closeSheet(silent){var l=$('#layer');if(l.firstChild){l.innerHTML='';document.body.style.overflow=''}S.sheet=null;if(!silent)render()}
+function mapsUrl(q){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q)}
+function placeCard(p){
+  var relay=p.status==='relay'||(p.relay&&p.status!=='delivered'&&p.status!=='out'),addr=p.addr||D.me.address;
+  if(relay){var r=p.relay||'';
+    return '<div class="place relay"><div class="pic">📍</div><div class="ptxt"><div class="small">À retirer en point relais</div><b>'+esc(r||'Point relais pas encore indiqué')+'</b>'+
+      (p.pickupCode?'<div>Code de retrait : <span class="code">'+esc(p.pickupCode)+'</span></div>':'')+(p.pickupBy?'<div>Avant le '+esc(fDay.format(pdate(p.pickupBy)))+'</div>':'')+
+      (r?'<a class="btn soft" href="'+esc(mapsUrl(r))+'" target="_blank" rel="noopener">'+IC.link+'Itinéraire</a>':'<button type="button" class="btn ghost" data-editparcel="'+esc(p.id)+'">Indiquer le point relais</button>')+'</div></div>';}
+  var lbl=p.status==='delivered'?'Livré à':'Livraison prévue à';
+  if(!addr)return '<div class="place"><div class="pic">🏠</div><div class="ptxt"><div class="small">'+lbl+'</div><b>Adresse non indiquée</b><button type="button" class="btn ghost" data-editparcel="'+esc(p.id)+'">Ajouter l\'adresse</button></div></div>';
+  return '<div class="place"><div class="pic">🏠</div><div class="ptxt"><div class="small">'+lbl+(p.addr?'':' (ton adresse)')+'</div><b style="white-space:pre-line">'+esc(addr)+'</b><a class="btn soft" href="'+esc(mapsUrl(addr))+'" target="_blank" rel="noopener">'+IC.link+'Voir sur la carte</a></div></div>';
+}
 function sheetParcel(p){
   S.sheet={k:'parcel',id:p.id};var c=carrierOf(p),u=trackUrl(p),ev=p.events||[];
   var h='<h2>'+esc(p.name||'Colis')+'</h2><p class="sub">'+esc([p.shop,c.n].filter(Boolean).join(' · '))+'</p>';
   h+='<div class="card"><div class="jlabels">'+STEPS.map(function(s,i){return '<span'+(i===stepOf(p)?' class="on"':'')+'>'+s[1]+'</span>'}).join('')+'</div>'+journey(p,true)+
     '<p style="margin:12px 0 0">'+statusLine(p)+'</p>'+(p.updated?'<p class="small" style="margin:4px 0 0">Mis à jour '+esc(fTime.format(new Date(p.updated)))+'</p>':'')+'</div>';
-  if(p.status==='relay')h+='<div class="relaybox">📍 <b>'+esc(p.relay||'Point relais')+'</b>'+(p.pickupCode?'<br>Code de retrait : <span class="code">'+esc(p.pickupCode)+'</span>':'')+(p.pickupBy?'<br>À retirer avant le '+esc(fShort.format(pdate(p.pickupBy))):'')+'</div>';
+  h+=placeCard(p);
   h+='<div class="codebox"><div><div class="small">Numéro de suivi</div><div class="code">'+esc(p.num||'—')+'</div></div><button type="button" class="btn ghost" data-copy="'+esc(p.num)+'" aria-label="Copier le numéro">'+IC.copy+'</button></div>';
   h+='<div class="btnrow" style="margin-bottom:12px">'+(u?'<a class="btn" href="'+esc(u)+'" target="_blank" rel="noopener">'+IC.link+'Suivre sur le site</a>':'')+(canAuto(p)?'<button type="button" class="btn soft" data-refresh="'+esc(p.id)+'">'+IC.refresh+'Actualiser</button>':'')+'</div>';
   h+='<div class="card"><b>Où en est-il ?</b><p class="small" style="margin:2px 0 10px">Mets à jour toi-même si le transporteur ne le fait pas.</p><div class="seg">'+
@@ -471,6 +488,7 @@ function formParcel(p){
   h+='<label class="field"><span>Transporteur</span><select id="p-car"><option value="">'+(D.me.t123Key?'Détection automatique':'Je ne sais pas')+'</option>'+Object.keys(CARRIERS).map(function(k){return '<option value="'+k+'"'+((p.carrier||'')===k?' selected':'')+'>'+CARRIERS[k].n+'</option>'}).join('')+'</select></label>';
   h+='<label class="field"><span>C\'est quoi ?</span><input id="p-name" value="'+esc(p.name||'')+'" placeholder="ex. Baskets running, cadeau de Léa…"></label>';
   h+='<div class="two"><label class="field"><span>Boutique</span><input id="p-shop" value="'+esc(p.shop||'')+'" placeholder="ex. Vinted"></label><label class="field"><span>Livraison prévue</span><input id="p-eta" type="date" value="'+esc(p.eta||'')+'"></label></div>';
+  h+='<label class="field"><span>Adresse de livraison</span><input id="p-addr" value="'+esc(p.addr||'')+'" placeholder="'+esc(D.me.address?'Ton adresse : '+D.me.address.split('\n')[0]:'ex. 12 rue des Lilas, Lyon')+'" autocomplete="street-address"><span class="hint">'+(D.me.address?'Laisse vide pour ton adresse habituelle.':'Astuce : enregistre ton adresse dans Mon compte pour ne plus la taper.')+'</span></label>';
   h+='<details'+(p.relay||p.pickupCode?' open':'')+'><summary class="small" style="margin:0 0 10px 4px;cursor:pointer">Point relais (facultatif)</summary><label class="field"><span>Point relais</span><input id="p-relay" value="'+esc(p.relay||'')+'" placeholder="ex. Tabac de la Gare, 3 rue…"></label><div class="two"><label class="field"><span>Code de retrait</span><input id="p-code" value="'+esc(p.pickupCode||'')+'"></label><label class="field"><span>À retirer avant</span><input id="p-by" type="date" value="'+esc(p.pickupBy||'')+'"></label></div></details>';
   h+='<label class="field"><span>Notes</span><textarea id="p-notes" placeholder="Facultatif">'+esc(p.notes||'')+'</textarea></label>';
   h+='<button type="submit" class="btn full">'+(p.id?'Enregistrer':'Suivre ce colis')+'</button></form>';
@@ -528,6 +546,7 @@ function lpRefresh(p,quiet){
     ev.sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
     if(ev.length){p.events=ev;var st=lpMap(ev[0].code);if(st)p.status=st}
     if(sh.estimDate)p.eta=String(sh.estimDate).slice(0,10);
+    var rpt=sh.contextData&&sh.contextData.removalPoint;if(rpt&&rpt.name&&(!p.relay||p.relayAuto)){p.relay=rpt.name;p.relayAuto=1}
     if(sh.deliveryDate&&p.status!=='delivered'&&/^DI/.test(ev[0]&&ev[0].code))p.status='delivered';
     p.updated=Date.now();save();return true;
   }).catch(function(){if(!quiet)toast('Pas de réponse de La Poste : vérifie ta connexion et ta clé.');return false});
@@ -548,13 +567,18 @@ function t123Status(st,last){
     case 'WAITING_DELIVERY':return /relais|retrait|retirer|disponible|consigne|locker|pick.?up|collect|point/i.test(last||'')?'relay':'out';
     case 'DELIVERY_FAILED':case 'ABNORMAL':return 'issue';case 'DELIVERED':return 'delivered'}return ''}
 function t123Date(d){if(d.eventTimeZeroUTC)return d.eventTimeZeroUTC;var t=String(d.eventTime||'');return t?t.replace(' ','T'):''}
+/* le nom du point relais est souvent dans le texte de l'étape (« … disponible au Point Relais TABAC DU CENTRE ») ; sinon le lieu de l'étape */
+function relayFrom(ev){var e=ev[0];if(!e)return '';
+  var m=/(?:point\s*relais|relais\s*colis|pickup|locker|consigne|bureau de poste|point de retrait|point retrait)\s*(?:pickup)?\s*[:\-–]?\s*([A-Z0-9][^.,;()]{3,60})/i.exec(e.label||'');
+  var name=m?m[1].trim():'';if(/^(le|la|les|du|de|votre|vous|est|a été|disponible)\b/i.test(name))name='';
+  return [name,e.place].filter(Boolean).join(', ');}
 function t123Apply(p,c){
   var leg=t123Leg(c);
   if(leg.courierCode){if(!p.carrierLocked)p.carrier=t123Carrier(leg.courierCode,leg.courierNameEN);p.carrierName=leg.courierNameEN||leg.courierCode;p.trackLink=leg.courierTrackingLink||p.trackLink||''}
   var ev=(leg.trackingDetails||[]).map(function(d){return {label:d.eventDetail||'',date:t123Date(d),place:d.address||''}}).filter(function(e){return e.label});
   if(ev.length)p.events=ev;
   var st=t123Status(c.transitStatus,ev[0]&&ev[0].label);if(st)p.status=st;
-  if(p.status==='relay'&&!p.relay&&ev[0]&&ev[0].place)p.relay=ev[0].place;
+  if(p.status==='relay'&&(!p.relay||p.relayAuto)){var rp=relayFrom(ev);if(rp){p.relay=rp;p.relayAuto=1}}
   if(c.expectedDelivery&&p.status!=='delivered')p.eta=String(c.expectedDelivery).slice(0,10);
   p.t123=1;p.updated=Date.now();
 }
@@ -680,6 +704,7 @@ document.addEventListener('click',function(e){
 document.addEventListener('input',function(e){
   if(e.target.id==='p-num')detectUi();
   if(e.target.id==='f-name'){D.me.name=e.target.value.trim();save()}
+  if(e.target.id==='f-addr'){D.me.address=e.target.value.trim();save()}
   if(e.target.id==='f-lpkey'){D.me.laposteKey=e.target.value.trim();save()}
   if(e.target.id==='f-t123'){D.me.t123Key=e.target.value.trim();save()}
 });
@@ -696,7 +721,7 @@ document.addEventListener('submit',function(e){
   if(f.id==='fp'){
     var r=detect(v('p-num'));if(!r.num){toast('Indique le numéro de suivi.');return}
     var raw=v('p-num'),o=S.sheet.id?find('parcels',S.sheet.id):{id:uid(),at:Date.now(),status:'ordered',events:[]};
-    o.num=r.num;o.link=/^https?:/i.test(raw)?raw:'';o.carrierLocked=!!(S.sheet.carrierLocked&&v('p-car'));o.carrier=v('p-car')||r.carrier||'';o.name=v('p-name');o.shop=v('p-shop');o.eta=v('p-eta');o.relay=v('p-relay');o.pickupCode=v('p-code');o.pickupBy=v('p-by');o.notes=v('p-notes');
+    o.num=r.num;o.link=/^https?:/i.test(raw)?raw:'';o.carrierLocked=!!(S.sheet.carrierLocked&&v('p-car'));o.carrier=v('p-car')||r.carrier||'';o.name=v('p-name');o.shop=v('p-shop');o.eta=v('p-eta');o.addr=v('p-addr');if(v('p-relay')!==(o.relay||''))o.relayAuto=0;o.relay=v('p-relay');o.pickupCode=v('p-code');o.pickupBy=v('p-by');o.notes=v('p-notes');
     if(o.relay&&o.status==='ordered')o.status='relay';
     if(!S.sheet.id){D.parcels=D.parcels.filter(function(x){return !x.demo});D.parcels.push(o)}save();closeSheet(true);S.tab='parcels';render();sheetParcel(o);
     var again=function(){if(S.sheet&&S.sheet.k==='parcel'&&S.sheet.id===o.id)sheetParcel(o);else if(!S.sheet)render()};

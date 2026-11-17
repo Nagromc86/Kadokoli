@@ -180,6 +180,11 @@ nav.tabs .add svg{width:28px;height:28px}
 .upd p{margin:0 0 12px;color:#2E4D5A}
 .qr{background:#fff;border-radius:16px;padding:12px;width:180px;margin:6px auto 12px}
 .small{font-size:.85rem;color:var(--muted)}
+.gsteps{list-style:none;margin:0 0 14px;padding:0;display:flex;flex-direction:column;gap:12px}
+.gstep{display:flex;gap:12px;background:var(--surface);border-radius:var(--r-md);padding:14px}
+.gstep>div{flex:1;min-width:0}.gstep p{margin:4px 0 10px;color:var(--muted);font-size:.92rem}
+.gnum{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--iris);color:#fff;font-weight:800;font-family:var(--display)}
+.gstep.done .gnum{background:var(--emerald)}
 .demo{display:inline-block;font-family:var(--body);font-size:.7rem;font-weight:700;color:var(--muted);background:var(--bg);border-radius:999px;padding:1px 7px;vertical-align:2px}
 .demo.on{background:rgba(255,255,255,.28);color:#fff;margin-top:6px}
 .tip{background:var(--surface);border-radius:var(--r-md);padding:16px;margin:-6px 0 22px;box-shadow:0 0 0 2px var(--iris-soft) inset}
@@ -366,7 +371,7 @@ function viewParcels(){
   if(!P.length)return h+'<div class="empty">'+logo('elogo')+'<h3>Aucun colis en route</h3><p>Colle un numéro de suivi : Kadokoli reconnaît le transporteur et te dit où en est ton colis.</p><button type="button" class="btn" data-add>'+IC.plus+'Ajouter un colis</button></div>';
   h+='<div class="hero parcels"><div class="big">'+act.length+'</div><p>'+(act.length>1?'colis en route':act.length?'colis en route':'Tout est arrivé 🎉')+'</p><div class="pills">'+
     (todayP.length?'<span class="pill">🚚 '+todayP.length+' aujourd\'hui</span>':'')+(relay.length?'<span class="pill">📍 '+relay.length+' à retirer</span>':'')+(dlv.length?'<span class="pill">✓ '+dlv.length+' livré'+(dlv.length>1?'s':'')+'</span>':'')+'</div></div>';
-  if(!D.me.t123Key&&!D.me.hideTip)h+='<div class="tip"><div><b>Juste le numéro, et c\'est tout</b><p>Active le suivi automatique : Kadokoli trouve le transporteur et le statut de chaque colis.</p><div class="btnrow"><button type="button" class="btn" data-tab="me">Activer (2 min)</button><button type="button" class="btn ghost" data-hidetip>Plus tard</button></div></div></div>';
+  if(!D.me.t123Key&&!D.me.hideTip)h+='<div class="tip"><div><b>Juste le numéro, et c\'est tout</b><p>Active le suivi automatique : Kadokoli trouve le transporteur et le statut de chaque colis.</p><div class="btnrow"><button type="button" class="btn" data-setup>Activer (2 min)</button><button type="button" class="btn ghost" data-hidetip>Plus tard</button></div></div></div>';
   if(relay.length)h+=group('À retirer en point relais',relay);
   var rest=act.filter(function(p){return relay.indexOf(p)<0});
   if(rest.length)h+=group('En route',rest);
@@ -403,7 +408,7 @@ function viewMe(){
   h+='<div class="card"><label class="field" style="margin:0"><span>Ton prénom</span><input id="f-name" value="'+esc(D.me.name)+'" placeholder="Pour te dire bonjour" autocomplete="given-name"></label></div>';
   h+='<div class="card"><div class="setrow"><div><b>Rappels</b><p>Une notification 30 jours, 7 jours et la veille de l\'expiration d\'un cadeau, et avant la date limite de retrait d\'un colis.</p></div><input type="checkbox" class="switch" data-notif'+(D.me.notif?' checked':'')+' aria-label="Rappels"></div>'+
     '<div class="setrow"><div style="flex:1;min-width:0"><b>Suivi automatique des colis</b>'+(D.me.t123Key?' <span class="okpill">activé</span>':'')+'<p>Avec une clé Track123 gratuite, le numéro suffit : Kadokoli trouve le transporteur (Colissimo, Mondial Relay, Vinted Go, UPS, DHL, Amazon… plus de 1 500) et met le statut à jour tout seul.</p>'+
-      '<ol class="steps"><li>Crée un compte gratuit sur <a href="https://www.track123.com" target="_blank" rel="noopener">track123.com</a>.</li><li>Va dans <b>Developers › API</b> et copie ta clé.</li><li>Colle-la ici.</li></ol>'+
+      (D.me.t123Key?'':'<button type="button" class="btn full" style="margin:10px 0 12px" data-setup>Activer en 3 étapes</button><p class="small" style="margin:0 0 6px">Ou colle directement ta clé :</p>')+
       '<div class="two" style="grid-template-columns:1fr auto;align-items:end"><label class="field" style="margin:0"><input id="f-t123" value="'+esc(D.me.t123Key||'')+'" placeholder="Clé API Track123" autocapitalize="off" spellcheck="false" autocomplete="off"></label><button type="button" class="btn soft" data-testkey>Tester</button></div>'+
       '<p class="small" style="margin-top:8px">Le forfait gratuit couvre une cinquantaine de nouveaux colis par mois. Les mises à jour d\'un colis déjà suivi ne comptent pas.</p>'+
       '<details style="margin-top:6px"><summary class="small" style="cursor:pointer">Option : clé La Poste</summary><p class="small">Avec une clé gratuite « Suivi v2 » du site développeur de La Poste, Colissimo, La Poste et Chronopost passent par La Poste et ne comptent pas dans le quota Track123.</p><label class="field" style="margin:6px 0 0"><input id="f-lpkey" value="'+esc(D.me.laposteKey)+'" placeholder="Clé « X-Okapi-Key »" autocapitalize="off" spellcheck="false"></label></details></div></div></div>';
@@ -491,6 +496,15 @@ function formGift(g){
   h+='<label class="field"><span>Notes</span><textarea id="g-notes" placeholder="Facultatif">'+esc(g.notes||'')+'</textarea></label>';
   h+='<button type="submit" class="btn pink full">'+(g.id?'Enregistrer':'Ajouter ce cadeau')+'</button></form>';
   openSheet(h);
+}
+function sheetSetup(){
+  S.sheet={k:'setup'};var on=!!D.me.t123Key;
+  var step=function(n,title,body,done){return '<li class="gstep'+(done?' done':'')+'"><span class="gnum">'+(done?'✓':n)+'</span><div><b>'+title+'</b>'+body+'</div></li>'};
+  openSheet('<h2>Suivi automatique</h2><p class="sub">Trois étapes, une seule fois. Ensuite, le numéro de suivi suffit : Kadokoli trouve le transporteur et le statut de chaque colis.</p><ol class="gsteps">'+
+    step(1,'Crée ton compte Track123','<p>C\'est gratuit et sans carte bancaire.</p><a class="btn full" href="https://member.track123.com/register" target="_blank" rel="noopener">'+IC.link+'Créer mon compte gratuit</a><p class="small" style="margin:8px 0 0">Déjà inscrit ? Passe à l\'étape 2.</p>',on)+
+    step(2,'Copie ta clé API','<p>Connecte-toi si besoin, puis copie la clé affichée (« API Key »).</p><a class="btn soft full" href="https://member.track123.com/api" target="_blank" rel="noopener">'+IC.link+'Ouvrir la page de ma clé</a>',on)+
+    step(3,'Colle-la ici','<p>Reviens dans Kadokoli, colle la clé puis active.</p><div class="two" style="grid-template-columns:1fr auto;align-items:center"><label class="field" style="margin:0"><input id="f-t123s" value="'+esc(D.me.t123Key||'')+'" placeholder="Ta clé Track123" autocapitalize="off" spellcheck="false" autocomplete="off"></label><button type="button" class="btn ghost" data-pastekey>Coller</button></div><button type="button" class="btn green full" style="margin-top:10px" data-activate>'+(on?'Vérifier ma clé':'Activer le suivi automatique')+'</button>',on)+
+  '</ol><p class="small">Le forfait gratuit couvre une cinquantaine de nouveaux colis par mois. Ta clé reste sur ce téléphone.</p>');
 }
 function chooseAdd(){
   openSheet('<h2>Ajouter</h2><p class="sub">Qu\'est-ce que tu veux suivre ?</p><div class="seg" style="flex-direction:column">'+
@@ -615,6 +629,8 @@ function shrink(file){return new Promise(function(res,rej){var u=URL.createObjec
 
 /* ---------- événements ---------- */
 document.addEventListener('click',function(e){
+  var ext=e.target.closest&&e.target.closest('a[target="_blank"]');
+  if(ext&&NATIVE){e.preventDefault();location.href=ext.href;return}
   var t=e.target.closest('button,a,[data-scrim]');if(!t)return;
   var d=t.dataset;
   if(t.hasAttribute('data-scrim')){if(e.target===t)closeSheet();return}
@@ -644,6 +660,16 @@ document.addEventListener('click',function(e){
   if(t.hasAttribute('data-shareapp')){share('Kadokoli','Je suis mes colis et mes cartes cadeaux avec Kadokoli. Télécharge l\'appli (Android) :',APK_URL);return}
   if(t.hasAttribute('data-testkey')){if(!D.me.t123Key){toast('Colle d\'abord ta clé Track123.');return}t.disabled=true;t.textContent='…';
     t123('v2.1/track/query',{trackNoInfos:[{trackNo:'KADOKOLITEST'}],queryPageSize:1}).then(function(j){toast(j.code==='00000'?'Clé valide ✓ Le suivi automatique est activé.':t123Msg(j));if(j.code==='00000'){render();refreshAll()}},function(){toast('Pas de réponse de Track123 : vérifie ta connexion.')}).then(function(){t.disabled=false;t.textContent='Tester'});return}
+  if(t.hasAttribute('data-setup')){sheetSetup();return}
+  if(t.hasAttribute('data-pastekey')){var inp=$('#f-t123s');
+    if(navigator.clipboard&&navigator.clipboard.readText)navigator.clipboard.readText().then(function(x){x=String(x||'').trim();if(x){inp.value=x;toast('Clé collée')}else{inp.focus();toast('Appui long dans le champ, puis Coller.')}},function(){inp.focus();toast('Appui long dans le champ, puis Coller.')});
+    else{inp.focus();toast('Appui long dans le champ, puis Coller.')}return}
+  if(t.hasAttribute('data-activate')){var k=($('#f-t123s').value||'').trim();if(!k){toast('Colle d\'abord ta clé Track123.');return}
+    D.me.t123Key=k;save();t.disabled=true;t.textContent='Vérification…';
+    t123('v2.1/track/query',{trackNoInfos:[{trackNo:'KADOKOLITEST'}],queryPageSize:1}).then(function(j){
+      if(j.code==='00000'){D.me.hideTip=1;save();closeSheet(true);render();toast('Suivi automatique activé ✓');refreshAll()}
+      else{toast(t123Msg(j));t.disabled=false;t.textContent='Réessayer'}
+    },function(){toast('Pas de réponse de Track123 : vérifie ta connexion.');t.disabled=false;t.textContent='Réessayer'});return}
   if(t.hasAttribute('data-hidetip')){D.me.hideTip=1;save();render();return}
   if(t.hasAttribute('data-checkupd')){checkUpdate(true);return}
   if(t.hasAttribute('data-download')){toast('Téléchargement lancé… ouvre ensuite le fichier pour installer.');if(NATIVE)location.href=APK_URL;else window.open(APK_URL,'_blank');return}
